@@ -1,0 +1,249 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>利用crontab定时请求网站 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1737013488762">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="利用crontab定时请求网站 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="ybproxy-auto-request
+GitHub 地址：https://github.com/wangyingbo/ybproxy-auto-request
+脚本作用
+
+利用github actions 自动访问请求herokuapp..." />
+    <meta name="keywords" content="GitHub" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1737013488762" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              利用crontab定时请求网站
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-11-22
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+                <a href="https://hiwyb.github.io/tag/EtiZT3XPY/" class="post-tag">
+                  # GitHub
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://hiwyb.github.io/post-images/li-yong-crontab-ding-shi-qing-qiu-wang-zhan.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="ybproxy-auto-request">ybproxy-auto-request</h1>
+<p><a href="https://github.com/wangyingbo/ybproxy-auto-request">GitHub 地址：https://github.com/wangyingbo/ybproxy-auto-request</a></p>
+<h2 id="脚本作用">脚本作用</h2>
+<ul>
+<li>利用github actions 自动访问请求herokuapp和netlify免费服务器的网址；实现herokuapp和netlify免费账号能一直保活。</li>
+<li>会把更新时间插入到recordtime.txt文件里，根据最新时间倒序排列；</li>
+</ul>
+<h2 id="使用">使用</h2>
+<p>如果你有一台Linux主机，或者你有一台不经常关机的Mac，那么你可以利用系统自带的<code>crontab</code>定时任务命令来执行定时任务。</p>
+<p>在终端输入<code>crontab -e</code> 命令，可以进入crontab定时任务编辑页，我们可以在这个文本里利用vim添加一条定时任务<code>crontab.sh</code>，添加完毕用<code>wq</code>保存退出；</p>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1637566962477.png" alt="" loading="lazy"></figure>
+<p>添加成功以后，可利用<code>crontab -l</code>命令查看添加的任务；</p>
+<figure data-type="image" tabindex="2"><img src="https://hiwyb.github.io/post-images/1637566978330.png" alt="" loading="lazy"></figure>
+<p>添加成功以后，需要重启cron进程：</p>
+<pre><code>service crond restart
+</code></pre>
+<p>可查看crontab的执行日志：</p>
+<pre><code>cat /var/log/cron
+
+</code></pre>
+<h2 id="crontabsh脚本如下">crontab.sh脚本如下：</h2>
+<pre><code>#!/bin/bash
+# author wangyingbo
+
+cd /root/Desktop/Projects/ybproxy-auto-request
+git pull --rebase
+DATE=`date +%Y%m%d%H%M%S`
+echo &quot;current git push time: $DATE&quot;
+# 插入到最后一行
+# echo $DATE &gt;&gt; ./recordtime.txt
+# 插入到第一行
+sed -i &quot;1i$DATE&quot; ./recordtime.txt
+git add recordtime.txt
+git commit --allow-empty -m &quot; update auto request ybproxy&quot;
+git push 
+sleep 1
+echo -e &quot;\033[33;40m  ($0) ${TIME}: this shell script execution duration: ${SECONDS}s  \033[0m&quot;
+echo &quot;😊😊😊😊😊😊success excute shell😊😊😊😊😊😊&quot;
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#ybproxy-auto-request">ybproxy-auto-request</a>
+<ul>
+<li><a href="#%E8%84%9A%E6%9C%AC%E4%BD%9C%E7%94%A8">脚本作用</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a></li>
+<li><a href="#crontabsh%E8%84%9A%E6%9C%AC%E5%A6%82%E4%B8%8B">crontab.sh脚本如下：</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/bao-chi-github-chang-lu/">
+              <h3 class="post-title">
+                保持GitHub 常绿
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
