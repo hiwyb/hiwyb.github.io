@@ -1,0 +1,414 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>一键安装ohmyzsh常用插件的脚本 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1740393591324">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="一键安装ohmyzsh常用插件的脚本 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="功能
+脚本实现了下载安装ohmyzsh的常用插件功能，并替换~/.zshrc文件的plugins字段配置；
+安装的plugins分别为：
+
+zsh-autosuggestions：zsh-autosuggestions 此插件实现了自动补全..." />
+    <meta name="keywords" content="shell,Linux" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1740393591324" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              一键安装ohmyzsh常用插件的脚本
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-11-29
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://hiwyb.github.io/tag/DWwfs7VRV/" class="post-tag">
+                  # shell
+                </a>
+              
+                <a href="https://hiwyb.github.io/tag/d2YeVEjXB/" class="post-tag">
+                  # Linux
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://hiwyb.github.io/post-images/yi-jian-an-zhuang-ohmyzsh-cha-jian-de-jiao-ben.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="功能">功能</h2>
+<p>脚本实现了下载安装<code>ohmyzsh</code>的常用插件功能，并替换<code>~/.zshrc</code>文件的plugins字段配置；<br>
+安装的plugins分别为：</p>
+<ul>
+<li><code>zsh-autosuggestions</code>：<a href="https://github.com/zsh-users/zsh-autosuggestions">zsh-autosuggestions</a> 此插件实现了自动补全语法功能，会自动缓存敲过一次的终端命令，并且在下次输入同样命令的前几个字符时，联想出命令；</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1638166049959.png" alt="" loading="lazy"></figure>
+<ul>
+<li><code>zsh-syntax-highlighting</code>：<a href="https://github.com/zsh-users/zsh-syntax-highlighting">zsh-syntax-highlighting</a> 此插件可以自动分析输入的Linux 及常用命令是否正确；</li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="https://hiwyb.github.io/post-images/1638167911169.gif" alt="" loading="lazy"></figure>
+<ul>
+<li><code>z</code>：<a href="https://github.com/rupa/z">z</a> 此插件实现了自动跳转目录功能，插件会以哈希表的形式自动记录你访问过的路径，在下次访问时，直接输入文件目录的最后一级，按<code>tab</code>即可联想出；</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://hiwyb.github.io/post-images/1638166661179.gif" alt="" loading="lazy"></figure>
+<h2 id="使用">使用</h2>
+<p>使用前本地需安装 <a href="https://github.com/ohmyzsh/ohmyzsh">ohmyzsh</a></p>
+<p>使用  <code>curl</code>, <code>wget</code> 等命令安装。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>curl</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>wget</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>fetch</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(fetch -o - https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>使用GitHub镜像地址安装。 Using this URL instead may be required if you're in a country like China or India (for certain ISPs), that blocks <code>raw.githubusercontent.com</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>curl</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(curl -fsSL https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>wget</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(wget -O- https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>fetch</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(fetch -o - https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>使用<code>upgrade_oh_my_zsh</code>或者<code>omz update</code>命令可以手动更新升级ohmyzsh。</p>
+<p>使用以下脚本自动安装<code>ohmyzsh</code>的常用plugins。脚本自动检测本地是否安装<code>ohmyzsh</code>，如果没安装过，会直接退出；</p>
+<pre><code>#! /bin/bash
+# author: wangyingbo
+# date: 2021-11-26 13:00
+
+# zshrc文件路径
+file_zshrc=~/.zshrc;
+
+echo -e &quot;\n&quot;
+
+files=$(ls ~/.oh-my-zsh 2&gt; /dev/null | wc -l) # 判断目录下是否存在已知后缀名文件
+if [ $files -ne 0 ] ; then 
+	echo -e &quot;\033[32;40m congratulations, the terminal has oh-my-zsh! \033[0m&quot;
+else
+	echo -e &quot;\033[31;40m warning: no oh-my-zsh，please install oh-my-zsh first!!! \033[0m&quot;
+	exit 1
+fi
+
+echo -e &quot;\n&quot;
+echo -e &quot;\033[33;40m will begin install oh-my-zsh plugins，please wait a minute \033[0m&quot;
+echo -e &quot;\n&quot;
+
+# z is exist:方法不可用
+isExistZ() {
+	para=0
+	file=`command -v _z | grep &quot;_z&quot;`
+	echo $file
+	if [[ $file =~ &quot;_z&quot; ]] ; then
+		para=1
+	else
+		echo &quot;&quot;
+	fi
+	return $para
+}
+
+# isExistZ
+# resZ=`echo $?`
+# echo $resZ
+# if [[ $resZ -eq 1 ]]; then
+# 	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+# else
+# 	echo -e &quot;\033[33;40m will begin install plugin z \033[0m&quot;
+# fi
+
+
+newPlugins=&quot;&quot;
+# 安装 plugin z
+if [[ -d ~/.oh-my-zsh/custom/plugins/z ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin z \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/rupa/z.git $ZSH_CUSTOM/plugins/z
+	newPlugins+=&quot; z&quot;
+	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/z ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zerror! \033[0m&quot;
+	exit 1
+fi
+
+# 安装 plugin zsh-autosuggestions
+if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin zsh-autosuggestions \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin zsh-autosuggestions \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+	newPlugins+=&quot; zsh-autosuggestions&quot;
+	echo -e &quot;\033[32;40m have installed the plugin zsh-autosuggestions \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zsh-autosuggestionserror! \033[0m&quot;
+	exit 1
+fi
+
+# 安装 zsh-syntax-highlighting
+if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin zsh-syntax-highlighting \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin zsh-syntax-highlighting \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+	newPlugins+=&quot; zsh-syntax-highlighting&quot;
+	echo -e &quot;\033[32;40m have installed the plugin zsh-syntax-highlighting \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zsh-syntax-highlightingerror! \033[0m&quot;
+	exit 1
+fi
+
+# 匹配以plugin开头，以)结尾的字符串
+plugins=`grep &quot;^plugin.*)$&quot; $file_zshrc`
+echo &quot;current plugins: $plugins&quot;
+echo -e &quot;\n&quot;
+
+# newPlugins+=&quot; z&quot;
+# newPlugins+=&quot; zsh-autosuggestions&quot;
+# newPlugins+=&quot; zsh-syntax-highlighting&quot;
+echo &quot;new plugins：$newPlugins&quot;
+echo -e &quot;\n&quot;
+
+# 获取已有的plugin的长度
+oriLength=${#plugins}
+# echo &quot;原来plugins字符串长度是：$oriLength&quot;
+# echo -e &quot;\n&quot;
+replaceIndex=$oriLength-1
+
+# 合并为新的plugins
+replacePlugins=${plugins:0:$replaceIndex}$newPlugins${plugins:$replaceIndex}
+echo &quot;merged plugins：$replacePlugins&quot;
+echo -e &quot;\n&quot;
+
+# 将某个文件中的字符串替换为新字符串 mac环境和linux环境 sed -i 使用不同
+# Mac使用：https://www.cnblogs.com/chunzhulovefeiyue/p/6561497.html
+# Linux使用：https://www.cnblogs.com/A121/p/10621152.html
+
+# eg:把文件中的jack替换成tom，并给源文件添加.backup后缀并备份；添加/g是全部替换，默认每行只替换一次。
+# sed -i &quot;.backup&quot; 's/jack/tom/g' $file_zshrc
+
+sed -i &quot;.backup&quot; &quot;s/$plugins/$replacePlugins/&quot; $file_zshrc
+
+totalPlugins=`grep &quot;^plugin.*)$&quot; $file_zshrc`
+echo &quot;total end plugin: $totalPlugins&quot;
+echo -e &quot;\n&quot;
+
+# 更新 .zshrc 文件
+source $file_zshrc
+
+# 输出脚本执行用时
+echo -e &quot;\n&quot;
+echo -e &quot;\033[32;40m this shell script execution duration(脚本执行时长): ${SECONDS}s  \033[0m&quot;
+
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%8A%9F%E8%83%BD">功能</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/li-yong-crontab-ding-shi-qing-qiu-wang-zhan/">
+              <h3 class="post-title">
+                利用crontab定时请求网站
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

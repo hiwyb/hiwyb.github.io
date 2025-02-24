@@ -1,0 +1,1972 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://hiwyb.github.io</id>
+    <title>秋林</title>
+    <updated>2025-02-24T10:39:53.622Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://hiwyb.github.io"/>
+    <link rel="self" href="https://hiwyb.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://hiwyb.github.io/images/avatar.png</logo>
+    <icon>https://hiwyb.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2025, 秋林</rights>
+    <entry>
+        <title type="html"><![CDATA[清理git仓库无用分支]]></title>
+        <id>https://hiwyb.github.io/post/qing-li-git-cang-ku-wu-yong-fen-zhi/</id>
+        <link href="https://hiwyb.github.io/post/qing-li-git-cang-ku-wu-yong-fen-zhi/">
+        </link>
+        <updated>2024-10-11T03:00:01.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="介绍">介绍</h2>
+<p><strong>随着项目经年累月的开发，本地git仓库有很多已开发完成的业务分支，如微博项目每周迭代一个版本，即每周都会产生一个发布分支，这样在本地仓库里，一些早期的分支会干扰我们的分支树，造成看代码极为不便，此脚本即为了解决这个问题，包含以下特点：</strong></p>
+<ul>
+<li>会删除当前<code>.git</code> 目录下除当前分支以外的其他分支；</li>
+<li>如果有多个需要保留的分支，可修改shell里的<code>whitelist</code> 变量，配置不需要删除的白名单；</li>
+<li>如果当前仓库里是多源仓库，即子文件夹里还是单独的git仓库，会遍历一级子文件夹，删除子文件夹里除白名单及当前分支以外的其他分支；</li>
+<li>为了代码安全，请在运行此脚本前，检查一下自己未push的本地分支；</li>
+</ul>
+<h2 id="代码如下">代码如下：</h2>
+<pre><code>#!/bin/bash
+
+# 定义白名单分支
+whitelist=(&quot;dev&quot; &quot;main&quot; &quot;master&quot; $(git branch --show-current))
+
+# 定义删除分支的函数
+clean_branches() {
+  local repo_path=$1
+  echo &quot;进入仓库: $repo_path&quot;
+  cd &quot;$repo_path&quot; || exit  # 进入仓库目录
+
+  # 获取当前分支
+  current_branch=$(git branch --show-current)
+  echo &quot;当前分支是: $current_branch&quot;
+
+  # 将当前分支加入白名单
+  whitelist+=(&quot;$current_branch&quot;)
+
+  # 获取所有本地分支
+  branches=$(git branch | sed 's/*//g' | tr -d ' ')
+
+  # 遍历所有分支并删除不在白名单中的分支
+  for branch in $branches; do
+    if [[ ! &quot; ${whitelist[@]} &quot; =~ &quot; ${branch} &quot; ]]; then
+      echo &quot;删除分支: $branch&quot;
+      git branch -D &quot;$branch&quot;
+    else
+      echo &quot;保留分支: $branch&quot;
+    fi
+  done
+
+  echo &quot;仓库 $repo_path 分支清理完成&quot;
+}
+
+# 获取父仓库的 Git 仓库地址
+parent_repo_url=$(git remote get-url origin 2&gt;/dev/null)
+# parent_path=$(dirname &quot;$PWD&quot;)
+parent_path=$(pwd)
+
+# 在当前目录执行分支清理
+clean_branches &quot;$(pwd)&quot;
+
+# 遍历当前目录的一级子文件夹
+for dir in */ ; do
+  cd $parent_path
+  if [ -d &quot;${dir%%/}/.git&quot; ]; then
+    echo &quot;$dir 是一个 Git 仓库&quot;
+
+    # 进入子文件夹，获取子仓库的 Git 仓库地址
+    cd &quot;${dir}&quot; || continue
+    child_repo_url=$(git remote get-url origin 2&gt;/dev/null)
+    cd ..
+
+    # 检查子仓库地址是否与父仓库不同
+    if [ &quot;$child_repo_url&quot; != &quot;$parent_repo_url&quot; ]; then
+      echo &quot;${dir} 是独立的 Git 仓库，执行分支清理&quot;
+      clean_branches &quot;${dir}&quot;
+    else
+      echo &quot;${dir} 与父仓库地址相同，跳过&quot;
+    fi
+  else
+    echo &quot;${dir} 不是一个 Git 仓库，跳过&quot;
+  fi
+done
+
+echo &quot;所有仓库的分支清理完成&quot;
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux运维比较常用的一些脚本]]></title>
+        <id>https://hiwyb.github.io/post/linux-yun-wei-bi-jiao-chang-yong-de-yi-xie-jiao-ben/</id>
+        <link href="https://hiwyb.github.io/post/linux-yun-wei-bi-jiao-chang-yong-de-yi-xie-jiao-ben/">
+        </link>
+        <updated>2024-10-11T02:28:00.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>转自：csdn 作者：已注销 （侵删）<br>
+原文链接：<a href="https://blog.csdn.net/lyshark_lyshark/article/details/125853245">https://blog.csdn.net/lyshark_lyshark/article/details/125853245</a></p>
+</blockquote>
+<hr>
+<p><strong><em>目录</em></strong></p>
+<!-- GFM-TOC -->
+<ul>
+<li><a href="#">一、根据PID过滤进程所有信息</a></li>
+<li><a href="#">二、根据进程名过滤进程信息</a></li>
+<li><a href="#">三、根据用户名查询该用户的相关信息</a></li>
+<li><a href="#">四、加固系统的一些配置</a></li>
+<li><a href="#">五：实现磁盘分区</a></li>
+<li><a href="#">六、使用一整块硬盘创建逻辑卷</a></li>
+<li><a href="#">七、将一块硬盘分区，然后分区设置为虚拟卷</a></li>
+</ul>
+<!-- GFM-TOC -->
+<hr>
+<p><strong><em>正文</em></strong></p>
+<h1 id="一-根据pid过滤进程所有信息">一、根据PID过滤进程所有信息</h1>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date:2018-10-10
+# Function: 根据用户输入的PID，过滤出该PID所有的信息
+
+read -p &quot;请输入要查询的PID: &quot; P
+n=`ps -aux| awk '$2~/^'$P'$/{print $11}'|wc -l`
+if [ $n -eq 0 ];then
+ echo &quot;该PID不存在！！&quot;
+ exit
+fi
+echo &quot;--------------------------------&quot;
+echo &quot;进程PID: $P&quot;
+echo &quot;进程命令：`ps -aux| awk '$2~/^'$P'$/{print $11}'`&quot;
+echo &quot;进程所属用户: `ps -aux| awk '$2~/^'$P'$/{print $1}'`&quot;
+echo &quot;CPU占用率：`ps -aux| awk '$2~/^'$P'$/{print $3}'`%&quot;
+echo &quot;内存占用率：`ps -aux| awk '$2~/^'$P'$/{print $4}'`%&quot;
+echo &quot;进程开始运行的时刻：`ps -aux| awk '$2~/^'$P'$/{print $9}'`&quot;
+echo &quot;进程运行的时间：`ps -aux| awk '$2~/^'$P'$/{print $10}'`&quot;
+echo &quot;进程状态：`ps -aux| awk '$2~/^'$P'$/{print $8}'`&quot;
+echo &quot;进程虚拟内存：`ps -aux| awk '$2~/^'$P'$/{print $5}'`&quot;
+echo &quot;进程共享内存：`ps -aux| awk '$2~/^'$P'$/{print $6}'`&quot;
+echo &quot;--------------------------------&quot;
+
+</code></pre>
+<h1 id="二-根据进程名过滤进程信息">二、根据进程名过滤进程信息</h1>
+<p>会显示出该进程名包含的所有线程。</p>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date：2018-10-10
+# Function: 根据输入的程序的名字过滤出所对应的PID，并显示出详细信息，如果有几个PID，则全部显示
+read -p &quot;请输入要查询的进程名：&quot; NAME
+N=`ps -aux | grep $NAME | grep -v grep | wc -l`    ##统计进程总数
+if [ $N -le 0 ];then
+  echo &quot;该进程名没有运行！&quot;
+fi
+i=1
+while [ $N -gt 0 ]
+do
+  echo &quot;进程PID: `ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $2}'`&quot;
+  echo &quot;进程命令：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $11}'`&quot;
+  echo &quot;进程所属用户: `ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $1}'`&quot;
+  echo &quot;CPU占用率：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $3}'`%&quot;
+  echo &quot;内存占用率：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $4}'`%&quot;
+  echo &quot;进程开始运行的时刻：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $9}'`&quot;
+  echo &quot;进程运行的时间：`  ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $11}'`&quot;
+  echo &quot;进程状态：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $8}'`&quot;
+  echo &quot;进程虚拟内存：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $5}'`&quot;
+  echo &quot;进程共享内存：`ps -aux | grep $NAME | grep -v grep | awk 'NR=='$i'{print $0}'| awk '{print $6}'`&quot;
+  echo &quot;***************************************************************&quot;
+  let N-- i++
+done
+
+</code></pre>
+<h1 id="三-根据用户名查询该用户的相关信息">三、根据用户名查询该用户的相关信息</h1>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date:2018-10-12
+# Function：根据用户名查询该用户的所有信息
+read -p &quot;请输入要查询的用户名：&quot; A
+echo &quot;------------------------------&quot;
+n=`cat /etc/passwd | awk -F: '$1~/^'$A'$/{print}' | wc -l`
+if [ $n -eq 0 ];then
+echo &quot;该用户不存在&quot;
+echo &quot;------------------------------&quot;
+else
+  echo &quot;该用户的用户名：$A&quot;
+  echo &quot;该用户的UID：`cat /etc/passwd | awk -F: '$1~/^'$A'$/{print}'|awk -F: '{print $3}'`&quot;
+  echo &quot;该用户的组为：`id $A | awk {'print $3'}`&quot;
+  echo &quot;该用户的GID为：`cat /etc/passwd | awk -F: '$1~/^'$A'$/{print}'|awk -F: '{print $4}'`&quot;
+  echo &quot;该用户的家目录为：`cat /etc/passwd | awk -F: '$1~/^'$A'$/{print}'|awk -F: '{print $6}'`&quot;
+  Login=`cat /etc/passwd | awk -F: '$1~/^'$A'$/{print}'|awk -F: '{print $7}'`
+  if [ $Login == &quot;/bin/bash&quot; ];then
+  echo &quot;该用户有登录系统的权限！！&quot;
+  echo &quot;------------------------------&quot;
+  elif [ $Login == &quot;/sbin/nologin&quot; ];then
+  echo &quot;该用户没有登录系统的权限！！&quot;
+  echo &quot;------------------------------&quot;
+  fi
+fi
+
+</code></pre>
+<h1 id="四-加固系统的一些配置">四、加固系统的一些配置</h1>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date:2018-10-11
+# Function:对账户的密码的一些加固
+read -p  &quot;设置密码最多可多少天不修改：&quot; A
+read -p  &quot;设置密码修改之间最小的天数：&quot; B
+read -p  &quot;设置密码最短的长度：&quot; C
+read -p  &quot;设置密码失效前多少天通知用户：&quot; D
+sed -i '/^PASS_MAX_DAYS/c\PASS_MAX_DAYS   '$A'' /etc/login.defs
+sed -i '/^PASS_MIN_DAYS/c\PASS_MIN_DAYS   '$B'' /etc/login.defs
+sed -i '/^PASS_MIN_LEN/c\PASS_MIN_LEN     '$C'' /etc/login.defs
+sed -i '/^PASS_WARN_AGE/c\PASS_WARN_AGE    '$D'' /etc/login.defs
+ 
+echo &quot;已对密码进行加固，新用户不得和旧密码相同，且新密码必须同时包含数字、小写字母，大写字母！！&quot;
+sed -i '/pam_pwquality.so/c\password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=  difok=1 minlen=8 ucredit=-1 lcredit=-1 dcredit=-1' /etc/pam.d/system-auth
+ 
+echo &quot;已对密码进行加固，如果输入错误密码超过3次，则锁定账户！！&quot;
+n=`cat /etc/pam.d/sshd | grep &quot;auth required pam_tally2.so &quot;|wc -l`
+if [ $n -eq 0 ];then
+sed -i '/%PAM-1.0/a\auth required pam_tally2.so deny=3 unlock_time=150 even_deny_root root_unlock_time300' /etc/pam.d/sshd
+fi
+ 
+echo  &quot;已设置禁止root用户远程登录！！&quot;
+sed -i '/PermitRootLogin/c\PermitRootLogin no'  /etc/ssh/sshd_config
+ 
+read -p &quot;设置历史命令保存条数：&quot; E
+read -p &quot;设置账户自动注销时间：&quot; F
+sed -i '/^HISTSIZE/c\HISTSIZE='$E'' /etc/profile
+sed -i '/^HISTSIZE/a\TMOUT='$F'' /etc/profile
+ 
+echo &quot;已设置只允许wheel组的用户可以使用su命令切换到root用户！&quot;
+sed -i '/pam_wheel.so use_uid/c\auth            required        pam_wheel.so use_uid ' /etc/pam.d/su
+n=`cat /etc/login.defs | grep SU_WHEEL_ONLY | wc -l`
+if [ $n -eq 0 ];then
+echo SU_WHEEL_ONLY yes &gt;&gt; /etc/login.defs
+fi
+ 
+echo &quot;即将对系统中的账户进行检查....&quot;
+echo &quot;系统中有登录权限的用户有：&quot;
+awk -F: '($7==&quot;/bin/bash&quot;){print $1}' /etc/passwd
+echo &quot;********************************************&quot;
+echo &quot;系统中UID=0的用户有：&quot;
+awk -F: '($3==&quot;0&quot;){print $1}' /etc/passwd
+echo &quot;********************************************&quot;
+N=`awk -F: '($2==&quot;&quot;){print $1}' /etc/shadow|wc -l`
+echo &quot;系统中空密码用户有：$N&quot;
+if [ $N -eq 0 ];then
+ echo &quot;恭喜你，系统中无空密码用户！！&quot;
+ echo &quot;********************************************&quot;
+else
+ i=1
+ while [ $N -gt 0 ]
+ do
+    None=`awk -F: '($2==&quot;&quot;){print $1}' /etc/shadow|awk 'NR=='$i'{print}'`
+    echo &quot;------------------------&quot;
+    echo $None
+    echo &quot;必须为空用户设置密码！！&quot;
+    passwd $None
+    let N--
+ done
+ M=`awk -F: '($2==&quot;&quot;){print $1}' /etc/shadow|wc -l`
+ if [ $M -eq 0 ];then
+  echo &quot;恭喜，系统中已经没有空密码用户了！&quot;
+ else
+echo &quot;系统中还存在空密码用户：$M&quot;
+ fi
+fi
+ 
+echo &quot;即将对系统中重要文件进行锁定，锁定后将无法添加删除用户和组&quot;
+read -p &quot;警告：此脚本运行后将无法添加删除用户和组！！确定输入Y，取消输入N；Y/N：&quot; i
+case $i in
+      [Y,y])
+            chattr +i /etc/passwd
+            chattr +i /etc/shadow
+            chattr +i /etc/group
+            chattr +i /etc/gshadow
+            echo &quot;锁定成功！&quot;
+;;
+      [N,n])
+            chattr -i /etc/passwd
+            chattr -i /etc/shadow
+            chattr -i /etc/group
+            chattr -i /etc/gshadow
+            echo &quot;取消锁定成功！！&quot;
+;;
+       *)
+            echo &quot;请输入Y/y or  N/n&quot;
+esac
+
+</code></pre>
+<h1 id="五实现磁盘分区">五：实现磁盘分区</h1>
+<p>只支持分配主分区和标准的linux文件系统(ext4/xfs)的分区</p>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date:2018-10-13
+# Function:对硬盘进行分区,得到一个标准的linux文件系统(ext4/xfs)的主分区
+cat /proc/partitions &gt; old
+read -p &quot;请输入你要分区的硬盘(写绝对路径，如：/dev/sda)：&quot; A
+if [ -e $A ];then
+  echo &quot;true&quot;
+else
+  echo &quot;该设备不存在！！&quot;
+  exit
+fi
+read -p &quot;请输入你要创建的磁盘分区类型(这里只能是主分区，默认按回车即可):&quot; B
+read -p &quot;请输入分区数字，范围1-4，默认从1开始，默认按回车即可：&quot; C
+read -p &quot;请输入扇区起始表号，默认按回车即可：&quot; D
+read -p &quot;请输入你要分区的分区大小(格式：如 +5G )：&quot; E
+fdisk $A &lt;&lt; EOF
+n
+p
+$C
+$D
+$E
+w
+EOF
+echo &quot;一个标准的linux文件系统的分区已经建立好！！&quot;
+partprobe $A
+echo &quot;-------------------------------&quot;
+cat /proc/partitions
+cat /proc/partitions &gt; new
+F=`diff new old | grep &quot;&lt;&quot; | awk '{print $5}'`
+echo &quot;-------------------------------&quot;
+echo $F
+echo &quot;你想对新分区设定什么类型的文件系统？有以下选项：&quot;
+echo &quot;A：ext4文件系统&quot;
+echo &quot;B：xfs文件系统&quot;
+read -p &quot;请输入你的选择：&quot; G
+case $G in
+        a|A)
+           mkfs.ext4 /dev/$F
+           echo &quot;该分区将被挂载在 &quot;/mnt/$F&quot; 下&quot; 
+           m=`ls /mnt/|grep $F | wc -l`
+           if [ $m -eq 0 ];then
+            mkdir /mnt/$F
+           fi
+           n=`cat /etc/fstab | grep /dev/$F| wc -l`
+           if [ $n -eq 0 ];then
+              echo &quot;/dev/$F     /mnt/$F     ext4         defaults          0      0&quot; &gt;&gt; /etc/fstab
+           else
+              sed -i '/^\/dev\/$F/c\/dev/$F     /mnt/$F     ext4         defaults          0      0' /etc/fstab
+           fi
+           mount -a
+           df -Th
+;;
+        b|B)
+           mkfs.xfs -f /dev/$F
+           echo &quot;该分区将被挂载在 &quot;/mnt/$F&quot; 下&quot; 
+           m=`ls /mnt/|grep $F | wc -l`
+           if [ $m -eq 0 ];then
+              mkdir /mnt/$F
+           fi
+           n=`cat /etc/fstab | grep /dev/$F | wc -l`
+           if [ $n -eq 0 ];then
+              echo &quot;/dev/$F     /mnt/$F      xfs       defaults          0      0&quot; &gt;&gt; /etc/fstab
+           else
+              sed -i '/^\/dev\/$F/c\/dev/$F     /mnt/$F     xfs         defaults          0      0' /etc/fstab
+           fi
+           mount -a
+           df -Th
+;;
+        *)
+           echo &quot;你的输入有误！！&quot;
+esac
+
+</code></pre>
+<h1 id="六-使用一整块硬盘创建逻辑卷">六、使用一整块硬盘创建逻辑卷</h1>
+<pre><code>#!/bin/bash
+# Author:谢公子
+# Date:2018-10-12
+# Function:使用一整块硬盘创建LVM逻辑卷
+read -p &quot;请输入你要做成逻辑卷的硬盘(写绝对路径，如：/dev/sda)：&quot; path
+if [ -e $path ];then
+  echo &quot;true&quot;
+else
+  echo &quot;该设备不存在！！&quot;
+  exit
+fi
+pvcreate $path
+echo &quot;该硬盘已做成物理卷！&quot;
+vgcreate myvg $path
+echo &quot;该物理卷已加入卷组 myvg 中&quot;
+vgs
+free=`vgs| awk '$1~/myvg/{print}'|awk '{print $6}'`
+echo &quot;该物理卷剩余的空间大小为：$free &quot;
+read -p &quot;请输入你要创建逻辑卷的大小(如：1G)：&quot; repy2
+lvcreate -L $repy2 -n mylv myvg
+echo &quot;已成功创建逻辑卷mylv&quot;
+echo &quot;------------------------&quot;
+lvs
+echo &quot;------------------------&quot;
+echo &quot;你想对新分区设定什么类型的文件系统？有以下选项：&quot;
+echo &quot;A：ext4文件系统&quot;
+echo &quot;B：xfs文件系统&quot;
+read -p &quot;请输入你的选择：&quot; repy3
+case $repy3 in
+        a|A)
+           mkfs.ext4 /dev/myvg/mylv
+           echo &quot;该分区将被挂载在 &quot;/mnt/mylv&quot; 下&quot; 
+           m=`ls /mnt/|grep mylv | wc -l`
+           if [ $m -eq 0 ];then
+            mkdir /mnt/mylv
+           fi
+           echo &quot;/dev/myvg/mylv     /mnt/mylv     ext4         defaults          0      0&quot; &gt;&gt; /etc/fstab
+           mount -a
+           df -Th
+;;
+        b|B)
+           mkfs.xfs -f /dev/myvg/mylv
+           echo &quot;该分区将被挂载在 &quot;/mnt/mylv&quot; 下&quot; 
+           m=`ls /mnt/|grep mylv | wc -l`
+           if [ $m -eq 0 ];then
+              mkdir /mnt/mylv
+           fi
+           echo &quot;/dev/myvg/mylv     /mnt/mylv      xfs       defaults          0      0&quot; &gt;&gt; /etc/fstab
+           mount -a
+           df -Th
+;;
+        *)
+           echo &quot;你的输入有误！！&quot;
+esac
+
+</code></pre>
+<h1 id="七-将一块硬盘分区然后分区设置为虚拟卷">七、将一块硬盘分区，然后分区设置为虚拟卷</h1>
+<pre><code>#! /bin/bash
+# Author:谢公子
+# Date:2018-10-13
+# Function:新建一个分区，并做成逻辑卷
+cat /proc/partitions &gt; old
+read -p &quot;请输入你要分区的硬盘(写绝对路径，如：/dev/sda)：&quot; A
+if [ -e $A ];then
+  echo &quot;true&quot;
+else
+  echo &quot;该设备不存在！！&quot;
+  exit
+fi
+read -p &quot;请输入你要创建的磁盘分区类型(这里只能是主分区，默认按回车即可):&quot; B
+read -p &quot;请输入分区数字，范围1-4，默认从1开始，默认按回车即可：&quot; C
+read -p &quot;请输入扇区起始表号，默认按回车即可：&quot; D
+read -p &quot;请输入你要分区的分区大小(格式：如 +5G )：&quot; E
+read -p &quot;请输入你要划分为逻辑卷的分区盘符(默认回车即可)：&quot; Z
+fdisk $A &lt;&lt; EOF
+n
+p
+$C
+$D
+$E
+t
+$Z
+8e
+p
+w
+EOF
+echo &quot;一个标准LVM的分区已经建立好！！&quot;
+partprobe $A
+echo &quot;-------------------------------&quot;
+cat /proc/partitions
+cat /proc/partitions &gt; new
+F=`diff new old | grep &quot;&lt;&quot; | awk '{print $5}'`
+echo &quot;-------------------------------&quot;
+echo $F
+pvcreate /dev/$F
+echo &quot;该硬盘已做成物理卷！&quot;
+n=`vgs | grep myvg |wc -l`
+if [ $n -eq 0 ];then
+   vgcreate myvg /dev/$F
+   echo &quot;该物理卷已加入卷组myvg中&quot;
+else
+   vgextend myvg /dev/$F
+   echo  &quot;该物理卷已加入卷组myvg中&quot;
+   vgs
+   free=`vgs| awk '$1~/myvg/{print}'|awk '{print $7}'`
+   echo &quot;该卷组剩余的空间大小为：$free &quot;
+   lvs
+   exit
+fi
+vgs
+free=`vgs| awk '$1~/myvg/{print}'|awk '{print $6}'`
+echo &quot;该卷组剩余的空间大小为：$free &quot;
+read -p &quot;请输入你要创建逻辑卷的大小(如：1G)：&quot; repy2
+lvcreate -L $repy2 -n mylv myvg
+echo &quot;已成功创建逻辑卷mylv&quot;
+echo &quot;------------------------&quot;
+lvs
+echo &quot;------------------------&quot;
+echo &quot;你想对新分区设定什么类型的文件系统？有以下选项：&quot;
+echo &quot;A：ext4文件系统&quot;
+echo &quot;B：xfs文件系统&quot;
+read -p &quot;请输入你的选择：&quot; G
+case $G in
+        a|A)
+           mkfs.ext4 /dev/myvg/mylv
+           echo &quot;该分区将被挂载在 &quot;/mnt/$F&quot; 下&quot; 
+           m=`ls /mnt/|grep $F | wc -l`
+           if [ $m -eq 0 ];then
+            mkdir /mnt/$F
+           fi
+           echo &quot;/dev/myvg/mylv     /mnt/$F     ext4         defaults          0      0&quot; &gt;&gt; /etc/fstab
+           mount -a
+           df -Th
+;;
+        b|B)
+           mkfs.xfs -f /dev/myvg/mylv
+           echo &quot;该分区将被挂载在 &quot;/mnt/$F&quot; 下&quot; 
+           m=`ls /mnt/|grep $F | wc -l`
+           if [ $m -eq 0 ];then
+              mkdir /mnt/$F
+           fi
+           echo &quot;/dev/myvg/mylv     /mnt/$F      xfs       defaults          0      0&quot; &gt;&gt; /etc/fstab
+           mount -a
+           df -Th
+;;
+        *)
+           echo &quot;你的输入有误！！&quot;
+esac
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux 管理脚本工具]]></title>
+        <id>https://hiwyb.github.io/post/linux-guan-li-jiao-ben-gong-ju/</id>
+        <link href="https://hiwyb.github.io/post/linux-guan-li-jiao-ben-gong-ju/">
+        </link>
+        <updated>2023-04-13T12:21:08.000Z</updated>
+        <content type="html"><![CDATA[<p>这个 shell 脚本，实现了多个 Linux 系统管理任务的功能，适合用于快速管理和维护 Linux 系统。主要包含以下功能：</p>
+<ul>
+<li>进程管理：列出当前正在运行的进程、杀死指定进程、按照端口号杀死进程。</li>
+<li>磁盘管理：查看磁盘使用情况、清理磁盘空间。</li>
+<li>网络管理：查看网络连接、配置网络接口、查询端口信息、扫描局域网设备。</li>
+<li>日志分析：查看系统日志、筛选关键字、保存日志。</li>
+<li>用户管理：查看用户列表、添加用户、删除用户、修改用户密码。</li>
+<li>安全管理：修改 SSH 端口、禁止 ROOT 登录。</li>
+<li>系统信息：查看操作系统、内核版本、CPU 信息、内存信息和磁盘信息。</li>
+<li>定时任务：查看当前用户的定时任务。</li>
+</ul>
+<pre><code>#!/bin/bash
+# author wangyingbo
+# date:2023-04-13 pm 20:30
+
+# 判断系统类型，选择合适的包管理器
+if [ -n &quot;$(command -v yum)&quot; ]; then
+  PKGMGR=&quot;yum&quot;
+elif [ -n &quot;$(command -v apt-get)&quot; ]; then
+  PKGMGR=&quot;apt-get&quot;
+else
+  echo &quot;无法确认系统类型，请手动安装软件包。&quot;
+  exit 1
+fi
+
+# 安装必需的工具和软件包
+for TOOL in curl tar zstd unzip; do
+  if ! command -v $TOOL &gt; /dev/null; then
+    sudo $PKGMGR install -y $TOOL
+  fi
+done
+
+# 菜单文字提示
+function menu() {
+  cat &lt;&lt; EOF
+=========================================
+           Linux 系统管理工具            
+=========================================
+1. 进程管理
+2. 磁盘管理
+3. 网络管理
+4. 日志分析
+5. 用户管理
+6. 安全管理
+7. 系统信息
+8. 定时任务
+0. 退出
+=========================================
+EOF
+  read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+}
+
+# 进程管理
+function process_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               进程管理                  
+-----------------------------------------
+1. 列出所有进程
+2. 杀死指定进程
+3. 按照端口杀死进程
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        ps aux
+        ;;
+      2)
+        read -p &quot;请输入要杀死的进程 ID：&quot; PID
+        kill $PID
+        ;;
+      3)
+        read -p &quot;请输入要杀死的端口号：&quot; PORT
+        sudo fuser -k $PORT/tcp
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 磁盘管理
+function disk_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               磁盘管理                  
+-----------------------------------------
+1. 查看磁盘使用情况
+2. 清理磁盘空间
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        df -h
+        ;;
+      2)
+        read -p &quot;请输入要清理的文件路径：&quot; PATH
+        sudo find $PATH -type f -mtime +30 -delete
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 网络管理
+function network_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               网络管理                  
+-----------------------------------------
+1. 查看网络连接
+2. 配置网络接口
+3. 查询端口信息
+4. 扫描局域网设备
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        netstat -anp
+        ;;
+      2)
+        sudo nano /etc/network/interfaces
+        ;;
+      3)
+        read -p &quot;请输入要查询的端口号：&quot; PORT
+        sudo lsof -i:$PORT
+        ;;
+      4)
+        read -p &quot;请输入 IP 地址范围（例如：192.168.1.1/24）：&quot; IP_RANGE
+        sudo nmap -sP $IP_RANGE
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 日志分析
+function log_analysis() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               日志分析                  
+-----------------------------------------
+1. 查看系统日志
+2. 筛选关键字
+3. 保存日志
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        cat /var/log/syslog
+        ;;
+      2)
+        read -p &quot;请输入要筛选的关键字：&quot; KEYWORD
+        cat /var/log/syslog | grep $KEYWORD
+        ;;
+      3) 
+        read -p &quot;请输入要保存的文件路径：&quot; FILEPATH
+        cat /var/log/syslog &gt; $FILEPATH
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 用户管理
+function user_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               用户管理                  
+-----------------------------------------
+1. 查看用户列表
+2. 添加用户
+3. 删除用户
+4. 修改用户密码
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        cat /etc/passwd
+        ;;
+      2)
+        read -p &quot;请输入新用户的用户名：&quot; USERNAME
+        sudo adduser $USERNAME
+        ;;
+      3)
+        read -p &quot;请输入要删除的用户的用户名：&quot; USERNAME
+        sudo userdel -r $USERNAME
+        ;;
+      4)
+        read -p &quot;请输入要修改密码的用户名：&quot; USERNAME
+        sudo passwd $USERNAME
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 安全管理
+function security_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               安全管理                  
+-----------------------------------------
+1. 修改 SSH 端口
+2. 禁止 ROOT 登录
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        read -p &quot;请输入新的 SSH 端口号：&quot; PORT
+        sudo sed -i &quot;s/Port .*/Port $PORT/g&quot; /etc/ssh/sshd_config
+        sudo service sshd restart
+        ;;
+      2)
+        sudo sed -i &quot;s/PermitRootLogin yes/PermitRootLogin no/g&quot; /etc/ssh/sshd_config
+        sudo service sshd restart
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 系统信息
+function system_info() {
+  cat &lt;&lt; EOF
+=========================================
+               系统信息                  
+=========================================
+操作系统：$(lsb_release -d | cut -f2-)
+内核版本：$(uname -r)
+CPU 信息：$(grep &quot;model name&quot; /proc/cpuinfo | head -n1 | cut -d: -f2-)
+内存信息：$(free -h | awk 'NR==2 {print $2}')
+磁盘信息：$(df -h | awk '$NF==&quot;/&quot; {print &quot;总容量：&quot; $2 &quot;, 剩余容量：&quot; $4}')
+=========================================
+EOF
+}
+
+# 定时任务
+function cron_job() {
+  crontab -l
+}
+
+# 主循环
+while true
+do
+  menu
+  case $CHOICE in
+    1)
+      process_mgmt
+      ;;
+    2)
+      disk_mgmt
+      ;;
+    3)
+      network_mgmt
+      ;;
+    4)
+      log_analysis
+      ;;
+    5)
+      user_mgmt
+      ;;
+    6)
+      security_mgmt
+      ;;
+    7)
+      system_info
+      ;;
+    8)
+      cron_job
+      ;;
+    0)
+      echo &quot;谢谢使用，再见！&quot;
+      exit 0
+      ;;
+    *)
+      echo &quot;错误的选择。&quot;
+      ;;
+  esac
+done
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Mac终端配置代理的脚本]]></title>
+        <id>https://hiwyb.github.io/post/pei-zhi-zhong-duan-zou-dai-li-de-jiao-ben/</id>
+        <link href="https://hiwyb.github.io/post/pei-zhi-zhong-duan-zou-dai-li-de-jiao-ben/">
+        </link>
+        <updated>2023-03-07T08:58:13.000Z</updated>
+        <content type="html"><![CDATA[<p>GitHub仓库地址 <a href="https://github.com/wangyingbo/YBScripts">YBScripts</a></p>
+<p>点击下面链接  <a href="https://raw.githubusercontent.com/wangyingbo/YBScripts/main/install_proxy.sh">install_proxy.sh</a></p>
+<p>鼠标右键另存为<code>install_proxy.sh</code>，对下载下来的文件执行加权命令：</p>
+<pre><code>chmod 777 install_proxy.sh
+</code></pre>
+<p>然后直接执行脚本：</p>
+<pre><code>./install_proxy.sh
+
+</code></pre>
+<p><strong>Mac终端快速开启代理脚本使用说明</strong></p>
+<p>打开Mac 上的代理软件，并打开代理开关；</p>
+<p>执行脚本，根据提示输入，提示 <code>please input shortcut command of start proxy:</code>时，输入在终端开启代理的命令，如果直接回车，默认为<code>startproxy</code>；</p>
+<p>提示<code>please input shortcut command of end proxy:</code>时，输入在终端关闭代理的命令，如果直接回车，默认为<code>endproxy</code>；</p>
+<p>提示<code>please input proxy port:</code>时，输入你的翻墙软件开启的代理端口，如<code>ClashX</code>默认端口为<code>7890</code>，如果直接回车，默认端口为<code>7890</code>；</p>
+<p>关闭终端窗口重新打开，或者执行<code>source ~/.zshrc</code> 或者 <code>source ~/.bashrc</code> 来立即应用环境变量；脚本运行完以后可删除此脚本；</p>
+<p>脚本会在 zsh 的配置文件 <code>~/.zshrc</code> 和 bash 的配置文件 <code>~/.bashrc</code> 中生成 alias 命令，脚本执行完以后，在代理软件打开的情况下，可使用配置的 <code>startproxy</code> 命令和 <code>endproxy</code> 命令来快速开启和关闭终端代理；</p>
+<p>执行 <code>startproxy</code> 输出结果如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1678205685824.png" alt="" loading="lazy"></figure>
+<p>可通过以下语句打印当前的代理：</p>
+<pre><code>echo -e &quot;\n $http_proxy \n $https_proxy \n $all_proxy&quot;
+</code></pre>
+<p>脚本内容预览：</p>
+<pre><code>#!/bin/bash
+# author wangyingbo
+# date:2023-03-07 pm 16:30
+
+port='' # 端口号
+startProxy='' # 开启代理的快捷命令
+endProxy='' # 结束代理的快捷命令
+pathzsh=~/.zshrc
+pathbash=~/.bashrc
+TIME=$(date &quot;+%Y-%m-%d %H:%M:%S&quot;)
+_DIR_=`pwd`
+# pathzsh=$_DIR_/zshrc.txt
+# pathbash=$_DIR_/bashrc.txt
+
+green(){
+	echo -e &quot;\033[32;40m $1 \033[0m&quot;
+}
+red(){
+	echo -e &quot;\033[31;40m $1 \033[0m&quot;
+}
+yellow(){
+	echo -e &quot;\033[33;40m $1 \033[0m&quot;
+}
+
+read -p &quot;please input shortcut command of start proxy:&quot; startProxy
+if [[ -z $startProxy ]]; then
+	yellow &quot;default start proxy command is 'startproxy'&quot;
+	startProxy='startproxy'
+else
+	green &quot;start proxy command is '$startProxy'&quot;
+fi
+
+read -p &quot;please input shortcut command of end proxy:&quot; endProxy
+if [[ -z $endProxy ]]; then
+	yellow &quot;default end proxy command is 'endproxy'&quot;
+	endProxy='endproxy'
+else
+	green &quot;end proxy command is '$endProxy'&quot;
+fi
+
+read -p &quot;please input proxy port:&quot; port
+if [[ -z $port ]]; then
+	yellow &quot;default proxy port is 7890&quot;
+	port='7890'
+else
+	green &quot;proxy port is '$port'&quot;
+fi
+
+sleep 0.25
+
+genproxy(){
+	echo -e &quot;\n&quot; &gt;&gt; $1
+	PROXYURL=http://127.0.0.1
+	PROXYPORT=$port
+	cat &gt;&gt; $1 &lt;&lt;PROXYEOF
+# 设置代理
+alias $startProxy=&quot;export http_proxy=$PROXYURL:$PROXYPORT https_proxy=$PROXYURL:$PROXYPORT;echo &quot;设置代理成功&quot;;#curl cip.cc&quot;
+# 取消代理
+alias $endProxy=&quot;unset http_proxy https_proxy;echo &quot;取消代理&quot;;#curl cip.cc&quot;
+PROXYEOF
+}
+
+bashExist=$(grep $startProxy $pathbash)
+zshExist=$(grep $startProxy $pathzsh)
+if [[ -z $zshExist ]]; then
+	echo &quot;&quot;
+else
+	red &quot;\n&quot;
+	red &quot;zsh alias proxy command has existed!&quot;
+	exit 1
+fi
+if [[ -z $bashExist ]]; then
+	echo &quot;&quot;
+else
+	red &quot;\n&quot;
+	red &quot;bash alias proxy command has existed!&quot;
+	exit 0
+fi
+
+shellsource=''
+if [ -n &quot;`$SHELL -c 'echo $BASH_VERSION'`&quot; ]; then
+   # assume Bash
+   shellsource='sh'
+elif [ -n &quot;`$SHELL -c 'echo $ZSH_VERSION'`&quot; ]; then
+   # assume Zsh
+   shellsource='zsh'
+else
+   # something else like fish
+   echo &quot;&quot;
+fi
+
+if [[ -e $pathzsh ]]; then
+	genproxy $pathbash
+	$shellsource $pathbash
+	green &quot;write proxy command to ${pathzsh##*/} successfully!&quot;
+fi
+
+if [[ -e $pathbash ]]; then
+	genproxy $pathzsh
+	$shellsource $pathzsh
+	green &quot;write proxy command to ${pathbash##*/} successfully!&quot;
+fi
+
+# shell excute time
+echo &quot;&quot;
+green &quot;${TIME} ($0): this shell script execution duration: ${SECONDS}s&quot;
+echo &quot;&quot;
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[js校验原生客户端日志开发]]></title>
+        <id>https://hiwyb.github.io/post/js-xiao-yan-yuan-sheng-ke-hu-duan-ri-zhi-kai-fa/</id>
+        <link href="https://hiwyb.github.io/post/js-xiao-yan-yuan-sheng-ke-hu-duan-ri-zhi-kai-fa/">
+        </link>
+        <updated>2022-10-28T02:54:42.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="video_js_template">video_js_template</h1>
+<h2 id="工程编译与使用">工程编译与使用</h2>
+<h3 id="工程编译">工程编译</h3>
+<ul>
+<li>使用<code>./wbinit.sh</code>脚本，安装本工程需要的相关依赖；</li>
+<li>使用<code>npm run webpack</code>，调用<code>./wbnpx.sh</code>脚本进行webpack打包；使用<code>node ./dist/bundle.js</code>可执行打包后的<code>bundle.js</code>文件；</li>
+<li>使用<code>npm run build</code>，内部调用<code>./wbnpx.sh;./wbversion.sh build</code>脚本进行webpack打包，同时打出来的<code>bundle.js</code>会生成version版本变量，可使用<code>npm run build 2</code>来指定build号为2，不传build号则版本信息里的build号会自增；版本信息存储在<code>version.data</code>文件中；</li>
+<li>使用<code>npm run release</code>，调用<code>./wbnpx.sh;./wbversion.sh release</code>脚本进行webpack打包，同时打出来的<code>bundle.js</code>会生成version版本变量，可利用<code>npm run release 1.0</code>命令指定版本号，如果不传版本号会展示最后一次的version号；如果本地安装了<code>wbcompile</code>工具，在使用<code>npm run release xx</code>时会直接上传<code>bundle.js</code>到ftp对应目录下；</li>
+<li>使用<code>npm run start</code>可启动<code>nodemon</code>服务，此服务会监听工程目录下的<code>/tscompile</code>文件夹文件的改动，若有更改时自动运行项目；</li>
+<li>使用<code>npm run tscompile</code>触发编译或者<code>Command + shift + b</code>手动触发<code>tasks.json</code>任务，可编译/src/下的所有ts文件，把编译后的中间产物输出到<code>/tscompile</code>文件夹下，如果开启了<code>nodemon</code>服务，会自动触发nodemon的watch事件，触发热更新；配置了<code>launch.json</code>文件，可使用VSCode自带的<code>运行和调试（command + shift + D）</code>对项目中的具体代码进行断点和调试开发；</li>
+<li>使用<code>npm run dev</code>，打开本地server，方便利用chrome调试；</li>
+<li>终端 -&gt; 运行任务 -&gt; 显示所有任务 -&gt; tsc:监视 - tsconfig.json，可以动态编译ts；</li>
+</ul>
+<h2 id="设计思路">设计思路</h2>
+<h3 id="整体流程">整体流程</h3>
+<ul>
+<li>使用<code>Node</code>框架开发 js 校验逻辑，然后通过<code>webpack</code>把所有js逻辑打包成<code>bundle.js</code>代码，通过编写的<code>wbcompile.sh</code>脚本，使用<code>wbcompile -u</code>命令把<code>bundle.js</code>文件上传到ftp服务器；</li>
+<li>业务方可使用<code>wbcompile -t</code>创建日志校验模板，模板支持<code>json</code>、<code>.ts</code>、<code>js</code>模板文件，编写完模板文件后，可使用<code>wbcompile -i xxx.ts -o path/to/js/directory</code>命令编译<code>ts</code>文件为<code>js</code>文件；</li>
+<li>端上从ftp服务器拉取<code>bundle.js</code>代码，执行此js文件，获取js运行环境；</li>
+<li>端上根据自己的业务判断，从ftp服务器上拉取自己的日志校验模板，获取模板文件的内容，即字符串；</li>
+<li>调用<code>bundle.js</code>里的函数，把当前的业务日志json和这条日志对应的js模板字符串作为调用函数的参数，可获取到校验结果，校验结果为json格式字符串；</li>
+<li>日志校验模版支持 <code>DSL</code> 表达式，<code>bundle.js</code> 会解析 <code>DSL</code> 文件生成 <code>AST</code> ，并根据运算符优先级解释执行；</li>
+<li>日志校验模版支持正则表达式校验；</li>
+<li>日志校验模版支持<code>js函数</code>校验（js模版）及<code>js函数字符串</code>校验（json模版）；</li>
+<li>根据返回的校验结果，端上做UI显示；</li>
+</ul>
+<h3 id="初步解决方案">初步解决方案</h3>
+<p>参见具体业务代码；</p>
+<h2 id="js校验api介绍">js校验api介绍</h2>
+<p><strong>校验工具暴露出的接口如下</strong></p>
+<ul>
+<li><code>loadTemplate(code: string)</code>: 加载模板字符串，参数为模板字符串，可以为json或者js模板字符串，内部会自动判断；</li>
+<li><code>loadJSTemplate(code: string)</code>: 参数为动态下发的js文件的模板字符串；可把需要的js模板文件加载执行；</li>
+<li><code>loadJsonTemplate(jsonString: string)</code>: 参数为下发的json格式的模板字符串；加载json模板；</li>
+<li><code>checkFunction(log: string, context: string)</code>: 第一个参数为需要校验的json字符串，第二个参数为需要增量结合模板校验的context；</li>
+<li><code>loadJSTemplateAndExecute(code: string, log: string, context: string)</code>: 加载单个js模板，并立即执行校验；</li>
+<li><code>loadJsonTemplateAndExecute(jsonString: string, log: string, context: string)</code>: 加载单个json模板，并立即执行校验；</li>
+</ul>
+<p><strong><code>loadTemplate</code>、<code>loadJSTemplate</code>、<code>loadJsonTemplate</code> 这三个方法的返回值是json数组，示例如下：</strong></p>
+<pre><code>[{&quot;id&quot;:&quot;799&quot;,&quot;items&quot;:[{&quot;name&quot;:&quot;uicode&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;^[0-9]+$&quot;},{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;},{&quot;name&quot;:&quot;friend&quot;,&quot;logic&quot;:1,&quot;rule&quot;:&quot;hi amigo #$$#, my name is #$placeholder$#, my age is #$p$#，see you!&quot;},{&quot;name&quot;:&quot;source_info&quot;,&quot;rule&quot;:&quot;(@mid &gt;= 0) &amp;&amp; (@source_info include 'face_sign_1')&quot;},{&quot;name&quot;:&quot;mid&quot;,&quot;logic&quot;:4},{&quot;name&quot;:&quot;ext&quot;,&quot;sub&quot;:[{&quot;name&quot;:&quot;objectid&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;^[0-9]{1,}(:|.{3})[0-9]+$&quot;},{&quot;name&quot;:&quot;authorid&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;[0-9]{1,}$&quot;}]}]},{&quot;id&quot;:&quot;template123&quot;,&quot;items&quot;:[{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;}]},{&quot;items&quot;:[{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;}],&quot;id&quot;:&quot;template456&quot;}]
+
+</code></pre>
+<p><strong><code>checkFunction</code>、<code>loadJSTemplateAndExecute</code>、<code>loadJsonTemplateAndExecute</code> 三个方法的返回值为json，示例如下：</strong></p>
+<pre><code>
+{&quot;success&quot;:true,&quot;code&quot;:1,&quot;reason&quot;:&quot;&quot;,&quot;results&quot;:[{&quot;key&quot;:&quot;uicode&quot;,&quot;value&quot;:&quot;10001344&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;^[0-9]+$&quot;},{&quot;key&quot;:&quot;fid&quot;,&quot;value&quot;:&quot;232673&quot;,&quot;success&quot;:true,&quot;logic&quot;:&quot;&quot;,&quot;required&quot;:false,&quot;rule&quot;:&quot;@fid == 232673&quot;},{&quot;key&quot;:&quot;friend&quot;,&quot;value&quot;:&quot;zjd&quot;,&quot;success&quot;:true,&quot;logic&quot;:1,&quot;required&quot;:false,&quot;rule&quot;:&quot;hi amigo zjd, my name is wyb, my age is 18，see you!&quot;},{&quot;key&quot;:&quot;source_info&quot;,&quot;value&quot;:&quot;face_sign_1&quot;,&quot;success&quot;:true,&quot;logic&quot;:&quot;&quot;,&quot;required&quot;:false,&quot;rule&quot;:&quot;(@mid &gt;= 0) &amp;&amp; (@source_info include 'face_sign_1')&quot;},{&quot;key&quot;:&quot;mid&quot;,&quot;value&quot;:&quot;4805675316939808&quot;,&quot;success&quot;:true,&quot;logic&quot;:4,&quot;required&quot;:false,&quot;rule&quot;:&quot;Function: e=&gt;!!e.mid&amp;&amp;/^[0-9]+$/.test(e.mid)&quot;},{&quot;key&quot;:&quot;objectid&quot;,&quot;value&quot;:&quot;1034%3A4805674547478607&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;^[0-9]{1,}(:|.{3})[0-9]+$&quot;},{&quot;key&quot;:&quot;authorid&quot;,&quot;value&quot;:&quot;7168897192&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;[0-9]{1,}$&quot;}]}
+
+</code></pre>
+<h2 id="工具脚本的使用">工具脚本的使用</h2>
+<p>使用下面命令安装配套的脚本工具：</p>
+<pre><code>
+# 一键安装wbcompile.sh脚本
+sudo curl http://ftp.client.weibo.cn/UI_Image/Video/ShellTools/installwbcompile.sh | sh
+
+</code></pre>
+<p><code>wbcompile</code>脚本具有处理新建日志模板、编译commonJS文件、上传ftp等功能，具体可通过<code>wbcompile -h</code>查看帮助命令；常用方法总结如下：</p>
+<ul>
+<li><code>wbcompile -t templateName</code>可在当前执行脚本的目录下生成<code>templateName.ts</code>模板文件，可根据需求修改模板文件保存；</li>
+<li><code>wbcompile -i inputFile(inputDir) -o outputDir</code> 或者 <code>wbcompile inputFile(inputDir) outputDir</code>命令对需要编译的文件进行编译，支持对<code>typescript</code>和<code>ES6</code>文件进行统一编译成<code>ES5</code>规范； -i 是需要编译的文件或文件夹，如果 -i 参数为文件夹，支持递归遍历子目录编译；-o 是编译后输出的文件路径；</li>
+<li><code>wbcompile -u file</code>调用上传命令，上传编译好的ES5文件到ftp服务器；</li>
+</ul>
+<h2 id="日志模板的定义">日志模板的定义</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">property</th>
+<th style="text-align:center">含义</th>
+<th style="text-align:center">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:center">需要校验的字段名，如uicode；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">required</td>
+<td style="text-align:center">是否是必须字段，即如果校验失败是否抛异常；默认是false；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">sub</td>
+<td style="text-align:center">如果验证的字段是复合型，比如ext字段，则支持多级嵌套；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">logic</td>
+<td style="text-align:center">逻辑关系，值含义枚举：0：表达式解析；1：包含；2：相等；3：正则；4：js函数；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">rule</td>
+<td style="text-align:center">和logic绑定关系，需要用来校验的rule；</td>
+<td style="text-align:center">logic为4时，rule为函数或者函数字符串，会调用rule函数来判断校验结果，参数为整个json转成的对象；logic为0或者不传时，默认使用表达式解析规则；可支持常用一元、二元操作符以及逻辑关系；</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<p><strong>rule支持placeholder功能，可使用<code>#$ here-could-be-anystring $#</code>包括起来的占位符来进行占位，在context传进来时替换占位符，如代码所示：</strong></p>
+<pre><code>// 如context 有个friend字段，需要动态拼接rule规则，可按下面示例所示构建rule，可用逗号分割多个值替换多个占位符
+var context = '{&quot;friend&quot;:&quot;zjd,wyb,18&quot;}';
+
+// 字段名和有placeholder的校验规则
+{
+    name:&quot;friend&quot;,
+    rule:&quot;hi amigo #$$#, my name is #$placeholder$#, my age is #$p$#，see you!&quot;
+}
+
+// 最终拼接好的用来校验的rule
+hi amigo zjd, my name is wyb, my age is 18，see you!
+
+</code></pre>
+<h2 id="遇到的问题和解决办法">遇到的问题和解决办法</h2>
+<ul>
+<li>原生<code>JSContext</code>不支持执行多个 <code>es6 js</code>文件，需要合并 <code>es6 js</code> 文件；</li>
+<li>使用<code>webpack</code>解决多个js文件合并问题，但是使用<code>webpack</code>的<code>bundle.js</code>文件是直接执行的匿名函数，一些export的方法名原生执行不到；</li>
+<li>编写<code>wbnpx.sh</code>脚本，对webpack生成的<code>bundle.js</code>文件做处理。匹配入口文件<code>app.js</code>中需要导出的对象，在bundle.js里直接写入；</li>
+<li>项目中js语法太过灵活，无法做类型定义，项目整体切换到<code>typescript</code>；</li>
+<li>单个js文件中可包含多个校验模板，模板和校验<code>log</code>逻辑拆分；</li>
+<li>利用<code>eval()</code>函数动态执行js文件字符串或者json模板字符串，可动态下发js代码执行；</li>
+<li>校验逻辑新增规则，可在js模板里定义一个<code>function</code>对象或者<code>function字符串</code>来进行校验，利用eval函数动态校验规则；同理json模板里也可返回<code>function字符串</code>；function的参数为<code>json转成的对象</code>；</li>
+<li>编写<code>wbcompile.sh</code>脚本，脚本可以生成模板文件，执行<code>ts文件</code>和<code>es6文件</code>转为<code>es5文件</code>，支持递归遍历子目录编译；支持直接上传ftp服务器；</li>
+<li>增加表达式解析规则，支持常用逻辑表达式解析，根据<code>LL(1)递归下降词法算法</code>编写解析器，读取输入表达式生成AST语法树，操作语法树节点运算校验；表达式支持一元、二元操作符，支持逻辑关系，支持变量的使用，示例如：<code>(@mid === (1+2+3)*2-5) &amp;&amp; (@source_info include 'face_sign_1')</code>；</li>
+<li>编写版本管理脚本，记录每次build行为，保存为<code>version.data</code>便于读取；支持build号自增，支持指定<code>release version</code>；</li>
+<li>在使用<code>wbcompile -u</code>上传本地创建好的模板文件时，先通过ftp拉取已经存在的模板配置<code>configurationtable.json</code>文件；通过脚本创建中间处理文件<code>temp_merge_table.js</code>，把模板js文件的内容直接输入到<code>temp_merge_table.js</code>文件中，把<code>configurationtable.json</code>配置文件的json字符串通过脚本转为<code>temp_merge_table.js</code>中的一个变量，然后通过编写代码做配置文件的合并；合并完成以后生成新的<code>configurationtable.json</code>文件，上传到ftp对应目录下；</li>
+<li>done.</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[How Do I Declare A Block in Objective-C?]]></title>
+        <id>https://hiwyb.github.io/post/how-do-i-declare-a-block-in-objective-c/</id>
+        <link href="https://hiwyb.github.io/post/how-do-i-declare-a-block-in-objective-c/">
+        </link>
+        <updated>2022-07-06T09:39:12.000Z</updated>
+        <content type="html"><![CDATA[<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>How Do I Declare A Block in Objective-C?</title>
+  <style>body {
+      background-color: #002b36;
+      color: #839496;
+      font-family: Lucida Grande, sans-serif;
+      font-size: 20px;
+      padding: 40px;
+      padding-bottom: 0;
+    }
+<pre><code>strong {
+  color: #268bd2;
+}
+
+h1 {
+  font-size: 40px;
+  margin-bottom: 1.5em;
+  text-align: center;
+}
+
+h2 {
+  font-weight: normal;
+}
+
+.return {
+  color: #2aa198;
+}
+
+.name {
+  color: #BC8800;
+}
+
+.parameter-types, .parameters {
+  color: #7C9F00;
+}
+
+.nullability {
+  color: #EC407A;
+}
+
+.disclaimer {
+  line-height: 2em;
+}
+
+code {
+  display: block;
+  font-family: Monaco, Menlo, monospace;
+  font-size: 20px;
+  margin-bottom: 3em;
+  margin-left: 40px;
+  margin-top: 1.5em;
+}
+
+footer {
+  font-size: 12px;
+  margin-top: 200px;
+  opacity: 0.4;
+  text-align: right;
+}
+
+a {
+  color: #0088D9;
+  text-decoration: none;
+}
+</code></pre>
+  </style>
+  <style media="print">body {
+      background-color: #FFFFFF;
+      font-size: 16px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 1em;
+    }
+
+    code {
+      font-size: 16px;
+      margin-bottom: 2em;
+      margin-left: 20px;
+    }
+
+    footer {
+      font-size: 10px;
+      margin-top: 40px;
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="57x57" href="apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+  <link rel="icon" type="image/png" href="favicon-196x196.png" sizes="196x196">
+  <link rel="icon" type="image/png" href="favicon-160x160.png" sizes="160x160">
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+  <link rel="mask-icon" href="pinned-tab.svg" color="#002b36">
+</head>
+<body>
+  <h1>How Do I Declare A Block in Objective-C?</h1>
+  <div>
+    <h2>As a <strong>local variable</strong>:</h2>
+    <code>
+      <span class="return">returnType</span> (^<span class="name">blockName</span>)(<span class="parameter-types">parameterTypes</span>) = ^<span class="return">returnType</span>(<span class="parameters">parameters</span>) {...};
+    </code>
+  </div>
+  <div>
+    <h2>As a <strong>property</strong>:</h2>
+    <code>
+      @property (nonatomic, copy, <span class="nullability">nullability</span>) <span class="return">returnType</span> (^<span class="name">blockName</span>)(<span class="parameter-types">parameterTypes</span>);
+    </code>
+  </div>
+  <div>
+    <h2>As a <strong>method parameter</strong>:</h2>
+    <code>
+      - (void)someMethodThatTakesABlock:(<span class="return">returnType</span> (^<span class="nullability">nullability</span>)(<span class="parameter-types">parameterTypes</span>))<span class="name">blockName</span>;
+    </code>
+  </div>
+  <div>
+    <h2>As an <strong>argument to a method call</strong>:</h2>
+    <code>
+      [someObject someMethodThatTakesABlock:^<span class="return">returnType</span> (<span class="parameters">parameters</span>) {...}];
+    </code>
+  </div>
+  <div>
+    <h2>As a <strong>parameter to a C function</strong>:</h2>
+    <code>
+      void SomeFunctionThatTakesABlock(<span class="return">returnType </span>(^<span class="name">blockName</span>)(<span class="parameter-types">parameterTypes</span>));<br/>
+    </code>
+  </div>
+  <div>
+    <h2>As a <strong>typedef</strong>:</h2>
+    <code>
+      typedef <span class="return">returnType</span> (^<span class="name">TypeName</span>)(<span class="parameter-types">parameterTypes</span>);<br/>
+      <span class="name">TypeName</span> blockName = ^<span class="return">returnType</span>(<span class="parameters">parameters</span>) {...};
+    </code>
+  </div>
+  <div class="disclaimer">
+    This site is not intended to be an exhaustive list of all possible uses of blocks.<br>
+    If you find yourself needing syntax not listed here, it is likely that a <strong>typedef</strong> would make your
+    code more readable.<br>
+    <br>
+    Unable to access this site due to the profanity in the URL? <strong><a href="http://goshdarnblocksyntax.com">http://goshdarnblocksyntax.com</a></strong>
+    is a more work-friendly mirror.
+  </div>
+  <footer>By <a href="http://lazerwalker.com">Em Lazer-Walker</a>, who has a very bad memory for this sort of thing.<br />
+    Like this site? Consider throwing me a few bucks via <a href='https://ko-fi.com/A2223KQN'>Ko-fi</a>.</footer>
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-43658906-1', 'fuckingblocksyntax.com');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Microsoft Office 365/2021/2019/2016 for Mac License 移除工具]]></title>
+        <id>https://hiwyb.github.io/post/microsoft-office-365202120192016-for-mac-license-yi-chu-gong-ju/</id>
+        <link href="https://hiwyb.github.io/post/microsoft-office-365202120192016-for-mac-license-yi-chu-gong-ju/">
+        </link>
+        <updated>2022-06-13T06:05:24.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>转载自<a href="https://github.com/pbowden-msft/Unlicense">pbowden-msft/Unlicense</a></p>
+</blockquote>
+<h1 id="unlicense">Unlicense</h1>
+<p><b>Microsoft Office 365/2021/2019/2016 for Mac License Removal Tool</b></p>
+<p>Purpose: Removes current Office 365/2021/2019/2016 for Mac activation license and returns apps to an unlicensed state</br><br>
+Usage: <code>Unlicense [--All] [--DetectOnly] [--O365] [--Volume] [--ForceClose]</code></br><br>
+Example: <code>Unlicense --All --ForceClose</code></br></p>
+<h1 id="installer-activited-microsoft-office-for-macos">Installer &amp; Activited Microsoft Office For MacOS</h1>
+<p><a href="https://github.com/alsyundawy/Microsoft-Office-For-MacOS">Installer &amp; Activited Microsoft Office For MacOS</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[开源翻译软件bob使用]]></title>
+        <id>https://hiwyb.github.io/post/kai-fa-fan-yi-ruan-jian-bob-shi-yong/</id>
+        <link href="https://hiwyb.github.io/post/kai-fa-fan-yi-ruan-jian-bob-shi-yong/">
+        </link>
+        <updated>2022-03-24T04:51:27.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="介绍">介绍</h1>
+<p>Bob 是一款 Mac 端翻译软件，支持<strong>划词翻译</strong>、<strong>截图翻译</strong>以及手动输入翻译。</p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7843961"><label class="task-list-item-label" for="task-item-7843961"> 划词翻译</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7463665"><label class="task-list-item-label" for="task-item-7463665"> 截图翻译</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2829864"><label class="task-list-item-label" for="task-item-2829864"> 输入翻译</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-6820934"><label class="task-list-item-label" for="task-item-6820934"> 翻译多开</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-9670089"><label class="task-list-item-label" for="task-item-9670089"> 自定义插件</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7921547"><label class="task-list-item-label" for="task-item-7921547"> 自动识别语种</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-1905572"><label class="task-list-item-label" for="task-item-1905572"> 驼峰拆分、蛇形拆分</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7975279"><label class="task-list-item-label" for="task-item-7975279"> AppleScript 调用</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-1157851"><label class="task-list-item-label" for="task-item-1157851"> PopClip 调用</label></li>
+</ul>
+<h1 id="官网地址-httpsripperhegiteeiobob">官网地址 <a href="https://ripperhe.gitee.io/bob/#/">https://ripperhe.gitee.io/bob/#/</a></h1>
+<h1 id="安装">安装</h1>
+<h3 id="系统要求">系统要求</h3>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>系统要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1.0 - 0.4.0</td>
+<td>macOS 10.12+</td>
+</tr>
+<tr>
+<td>0.5.0+</td>
+<td>macOS 10.13+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="homebrew-cask-安装技术人员使用">Homebrew Cask 安装（技术人员使用）</h3>
+<pre><code class="language-bash">brew install --cask bob
+</code></pre>
+<h3 id="手动安装普适">手动安装（普适）</h3>
+<table>
+<thead>
+<tr>
+<th>渠道</th>
+<th>建议</th>
+<th>下载</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>从 <a href="https://github.com/ripperhe/Bob/releases">GitHub release</a> 下载</td>
+<td>国外从这里下载更快</td>
+<td><a href="https://github.com/ripperhe/Bob/releases/latest/download/Bob.zip">点此下载 ⬇</a></td>
+</tr>
+<tr>
+<td>从 <a href="https://gitee.com/ripperhe/Bob/releases">Gitee release</a> 下载</td>
+<td>国内从这里下载更快</td>
+<td><a href="https://gitee.com/ripperhe/Bob/attach_files/980744/download/Bob.zip">点此下载 ⬇</a></td>
+</tr>
+</tbody>
+</table>
+<p>下载完成之后，解压并拖拽到<strong>应用程序</strong>文件夹即可</p>
+<h1 id="如何使用">如何使用</h1>
+<h2 id="软件介绍">软件介绍</h2>
+<p>打开bob 偏好设置</p>
+<figure data-type="image" tabindex="1"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071904916.png" alt="偏好设置" loading="lazy"></figure>
+<p>软件页面如下图，主要用到以下两个功能。其中<code>偏好设置</code>是设置常用快捷键以及用户偏好的，<code>服务</code>重点是翻译功能以及截图识别并翻译功能。</p>
+<figure data-type="image" tabindex="2"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071906587.png" alt="软件页面" loading="lazy"></figure>
+<p>点击<code>文本翻译</code>tab下的“+”号添加一种API，常用的有百度翻译，腾讯翻译，阿里翻译等。其中软件默认提供了一种百度翻译的，不过百度翻译的秘钥是作者免费提供的，不稳定，可以添加完服务以后自己申请对应平台的秘钥，使用自己的秘钥进行翻译。</p>
+<figure data-type="image" tabindex="3"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071906502.png" alt="文本翻译" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071907135.png" alt="添加秘钥" loading="lazy"></figure>
+<p>其中<code>简明英汉词典</code>和<code>金山词霸</code>是内置的，可以添加上去。如果使用<code>简明英汉词典</code>别忘记下载开源的词典数据库，可以使翻译更精确。</p>
+<figure data-type="image" tabindex="5"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071908179.png" alt="内置" loading="lazy"></figure>
+<p>在<code>文本识别</code>翻译中，建议使用内置的<code>离线文本识别</code>，这个使用的是Mac系统内置的文字识别服务，可免费使用。当前如果感觉系统文字识别效果不好，也可用点击“+”号添加下面的平台服务，自己去申请秘钥添加。</p>
+<figure data-type="image" tabindex="6"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071909727.png" alt="文本识别" loading="lazy"></figure>
+<p>在<code>语音合成</code>中，同样建议使用系统的<code>离线语音合成</code>，调用Mac系统原生的读屏幕功能。同样可以点击“+”号单独申请各个平台独立的秘钥使用。</p>
+<figure data-type="image" tabindex="7"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071909716.png" alt="语音合成" loading="lazy"></figure>
+<h2 id="plugin的介绍">plugin的介绍。</h2>
+<p>插件是软件提供的第三方集成服务，可拓展此软件功能。使用方法是，先下载插件，然后双击即可安装。安装过的插件，会在点击“+”号时显示可用状态。</p>
+<p><a href="https://ripperhe.gitee.io/bob/#/general/quickstart/plugin">插件使用教程</a></p>
+<figure data-type="image" tabindex="8"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071910199.png" alt="plugin" loading="lazy"></figure>
+<p>插件下载过程，首先打开链接<a href="https://github.com/topics/bobplugin">https://github.com/topics/bobplugin</a>，打开页面如图</p>
+<figure data-type="image" tabindex="9"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071911971.jpeg" alt="plugin-list" loading="lazy"></figure>
+<p>然后选择你需要的插件，本例以第一个<code>bobplugin-google-translate</code>谷歌翻译插件为例。点击第一个进入页面:</p>
+<figure data-type="image" tabindex="10"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071912926.jpeg" alt="bobplugin-google-translate" loading="lazy"></figure>
+<p>点击箭头所指的地方，即Release下面的版本号，点击后进入最新版本的发布页面：</p>
+<figure data-type="image" tabindex="11"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071912568.jpeg" alt="bobplugin-google-translate release" loading="lazy"></figure>
+<p>点击箭头所示的，以<code>.bobplugin</code>为后缀的文件，会自动下载。下载后的文件，直接双击进行安装：</p>
+<figure data-type="image" tabindex="12"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071913327.jpeg" alt="install plugin" loading="lazy"></figure>
+<p>安装后可在全部插件里看到此插件：</p>
+<figure data-type="image" tabindex="13"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071913315.png" alt="all plugins" loading="lazy"></figure>
+<p>可以在<code>服务</code>里的<code>文本翻译</code>的“+”号里添加使用。</p>
+<figure data-type="image" tabindex="14"><img src="https://raw.githubusercontent.com/wangyingbo/PrivateImages/master/2022/202206071914167.png" alt="文本翻译添加插件" loading="lazy"></figure>
+<p><strong>插件推荐</strong></p>
+<p>这是 Bob 的一个 google 语法检查插件, 基于 Bob google 翻译插件修改而来。插件会先将输入的文本使用 google 翻译一遍，再把翻译结果用 google 翻译回输入语言，适用于书写英文时查看 Google 翻译推荐的写法，也许可以帮你纠正时态、补充定语、推荐更准确的单词等。<br>
+<a href="https://github.com/tankxu/bobplugin-google-translate-grammar-checker">https://github.com/tankxu/bobplugin-google-translate-grammar-checker</a><br>
+Bob 的一个Google 翻译插件。使用Google翻译进行翻译，无需翻墙即可使用。<br>
+<a href="https://github.com/roojay520/bobplugin-google-translate">https://github.com/roojay520/bobplugin-google-translate</a><br>
+能不能好好好说话。互联网缩写词、潮流词查询等。<br>
+<a href="https://github.com/roojay520/bobplug-nbnhhsh">https://github.com/roojay520/bobplug-nbnhhsh</a><br>
+一个 Bob 插件，支持简繁互转，汉字&gt;拼音，汉字&gt;火星文转换。<br>
+<a href="https://github.com/roojay520/bobplug-pinyin">https://github.com/roojay520/bobplug-pinyin</a><br>
+Google tts文字转语音插件。<br>
+<a href="https://github.com/roojay520/bobplug-google-tts">https://github.com/roojay520/bobplug-google-tts</a></p>
+<hr>
+<h1 id="各个服务平台的申请教程和平台对比">各个服务平台的申请教程和平台对比</h1>
+<p>请参考链接  <a href="https://ripperhe.gitee.io/bob/#/general/quickstart/service">服务教程与各平台对比</a></p>
+<p>Bob 的翻译功能是由几种的服务配合完成的，如下所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">服务</th>
+<th style="text-align:left">使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">文本翻译</td>
+<td style="text-align:left">用于翻译文本，<strong>每次翻译都会调用</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">文本识别</td>
+<td style="text-align:left">用于获取图片中的文本，<strong>截图翻译时会调用</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">语音合成</td>
+<td style="text-align:left">用于合成音频，点击翻译页面播放按钮时会调用</td>
+</tr>
+</tbody>
+</table>
+<p>每种服务我都接入了多家服务商的服务，你可以根据自己的喜好自由选择。</p>
+<p><strong>Bob 本身是不收费的，但使用某些服务可能需要给服务商支付一定的费用，这和 Bob 无关</strong>。</p>
+<p>所以你现在有三个选择：</p>
+<ol>
+<li>使用 Bob 内置的服务
+<ul>
+<li>这些服务可以直接添加使用，无需额外配置</li>
+<li>这些服务要么本来就是免费的，要么就是填的我的秘钥，然后我共享给大家使用了</li>
+<li>我的秘钥每月的总额度和每秒并发请求数都是有限的，<strong>随着使用人数的增多，一定会出现调用缓慢甚至完全无法使用的情况</strong></li>
+</ul>
+</li>
+<li>自行申请私人秘钥
+<ul>
+<li>稳定可靠，申请一次可持续使用</li>
+<li><strong>许多服务都有大量免费额度，私人使用足够了</strong></li>
+<li>需要自行申请，可能略显繁琐</li>
+</ul>
+</li>
+<li>自定义插件
+<ul>
+<li>可以利用 <code>JavaScript</code> 自定义 API</li>
+<li>可以用于接入一些你需要，但是 Bob 没有接入的服务</li>
+<li>需要一定的编码能力，不过也可以使用他人写好的 Bob 插件</li>
+</ul>
+</li>
+</ol>
+<h3 id="已接入的服务">已接入的服务</h3>
+<p>下方列出了 Bob 已接入的所有服务，同时也展示的各大服务商的大致收费情况，<strong>数据仅供参考</strong>。每个服务商的计费规则复杂多样，随着时间推移可能有一定变化。</p>
+<p>?&gt; 我针对每个可以申请私人秘钥的服务都写了一篇申请教程，跟随教程应该很快就能申请完成。 💪</p>
+<p>文本翻译：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">服务</th>
+<th style="text-align:left">免费额度</th>
+<th style="text-align:left">超出免费额度</th>
+<th style="text-align:left">并发请求数</th>
+<th style="text-align:left">申请教程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">百度翻译试用版</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，无需申请，不保证稳定性</td>
+</tr>
+<tr>
+<td style="text-align:left">金山词霸</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，无需申请，不保证稳定性</td>
+</tr>
+<tr>
+<td style="text-align:left">简明英汉词典增强版</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，无需申请，不保证稳定性</td>
+</tr>
+<tr>
+<td style="text-align:left">腾讯翻译君</td>
+<td style="text-align:left">每月500万字符 👍</td>
+<td style="text-align:left">58元/100万字符</td>
+<td style="text-align:left">5次/秒</td>
+<td style="text-align:left"><a href="service/translate/tencent.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">百度翻译</td>
+<td style="text-align:left">完全免费，无限使用 👍</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">1次/秒</td>
+<td style="text-align:left"><a href="service/translate/baidu.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">阿里翻译</td>
+<td style="text-align:left">每月100万字符 👍</td>
+<td style="text-align:left">50元/100万字符</td>
+<td style="text-align:left">50次/秒</td>
+<td style="text-align:left"><a href="service/translate/ali.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">有道翻译</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">48元/100万字符</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/translate/youdao.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">搜狗翻译（即将下线）</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">40元/100万字符</td>
+<td style="text-align:left">50次/秒</td>
+<td style="text-align:left"><a href="service/translate/sougou.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">彩云小译</td>
+<td style="text-align:left">每月100万字符 👍</td>
+<td style="text-align:left">20元/100万字符</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/translate/caiyun.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">小牛翻译</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">500元/1000万字符</td>
+<td style="text-align:left">50次/秒</td>
+<td style="text-align:left"><a href="service/translate/niu.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Google 翻译</td>
+<td style="text-align:left">每月50万字符</td>
+<td style="text-align:left">20美元/100万字符</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/translate/google.md">点此跳转</a></td>
+</tr>
+</tbody>
+</table>
+<p>文本识别：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">服务</th>
+<th style="text-align:left">免费额度</th>
+<th style="text-align:left">超出免费额度</th>
+<th style="text-align:left">并发请求数</th>
+<th style="text-align:left">申请教程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">离线文本识别</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，macOS 11 以上可用，可离线使用</td>
+</tr>
+<tr>
+<td style="text-align:left">百度智能云通用 OCR 试用版</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，无需申请，不保证稳定性</td>
+</tr>
+<tr>
+<td style="text-align:left">百度智能云通用 OCR</td>
+<td style="text-align:left">每月1000次 👍</td>
+<td style="text-align:left">0.0050元/次</td>
+<td style="text-align:left">2次/秒</td>
+<td style="text-align:left"><a href="service/ocr/baidu.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">腾讯云通用 OCR</td>
+<td style="text-align:left">每月1000次 👍</td>
+<td style="text-align:left">0.15元/次</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/ocr/tencent.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">腾讯云图片翻译</td>
+<td style="text-align:left">每月10000次 👍</td>
+<td style="text-align:left">0.045元/次</td>
+<td style="text-align:left">1次/秒</td>
+<td style="text-align:left"><a href="service/ocr/tencentimagetranslate.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">有道智云通用 OCR</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">0.01元/次</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/ocr/youdao.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">搜狗深智 OCR（即将下线）</td>
+<td style="text-align:left">无</td>
+<td style="text-align:left">0.006元/次</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/ocr/sougou.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Google OCR</td>
+<td style="text-align:left">每月1000次 👍</td>
+<td style="text-align:left">1.5美元/1000次</td>
+<td style="text-align:left">1800次/分钟</td>
+<td style="text-align:left"><a href="service/ocr/google.md">点此跳转</a></td>
+</tr>
+</tbody>
+</table>
+<p>语音合成：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">服务</th>
+<th style="text-align:left">免费额度</th>
+<th style="text-align:left">超出免费额度</th>
+<th style="text-align:left">并发请求数</th>
+<th style="text-align:left">申请教程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">离线语音合成</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">内置服务，macOS 10.15 以上可用，可离线使用</td>
+</tr>
+<tr>
+<td style="text-align:left">腾讯云语音合成</td>
+<td style="text-align:left">新用户可领取800万字符，3月内有效</td>
+<td style="text-align:left">0.2元/万字符</td>
+<td style="text-align:left">20次/秒（免费试用为3次/秒）</td>
+<td style="text-align:left"><a href="service/tts/tencent.md">点此跳转</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Google 语音合成</td>
+<td style="text-align:left">每月400万字符 👍</td>
+<td style="text-align:left">4美元/100万字符</td>
+<td style="text-align:left">无相关说明</td>
+<td style="text-align:left"><a href="service/tts/google.md">点此跳转</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="通过插件接入服务">通过插件接入服务</h2>
+<p>考虑到部分用户希望自定义 API，Bob 支持以插件的形式自行实现各种服务。将开发完成的插件安装到 Bob，即可像其他普通的服务一样使用。详情见 <a href="general/quickstart/plugin.md">使用插件</a> 相关文章。</p>
+<h2 id="如何添加和启用服务">如何添加和启用服务?</h2>
+<p>在 Bob 中打开 「偏好设置-翻译-服务」，这里我以「文本翻译」服务为例</p>
+<ol>
+<li>选中「文本翻译」tab 栏</li>
+<li>点击页面下方的 <b><font color=red>+</font></b> 号</li>
+<li>在弹出的菜单中选中自己想要添加的服务</li>
+<li>如果添加的是需要输入秘钥的服务，请将申请的秘钥填到服务详情的对应位置（可以点击 <code>验证</code> 按钮测试秘钥是否有效）</li>
+<li>确保自己刚刚创建的服务的开关是<b><font color=red>开启状态</font></b></li>
+<li>点击页面右下角<b><font color=red>「保存」</font></b>按钮❗️❗️❗️</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[一键安装ohmyzsh常用插件的脚本]]></title>
+        <id>https://hiwyb.github.io/post/yi-jian-an-zhuang-ohmyzsh-cha-jian-de-jiao-ben/</id>
+        <link href="https://hiwyb.github.io/post/yi-jian-an-zhuang-ohmyzsh-cha-jian-de-jiao-ben/">
+        </link>
+        <updated>2021-11-29T06:02:45.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="功能">功能</h2>
+<p>脚本实现了下载安装<code>ohmyzsh</code>的常用插件功能，并替换<code>~/.zshrc</code>文件的plugins字段配置；<br>
+安装的plugins分别为：</p>
+<ul>
+<li><code>zsh-autosuggestions</code>：<a href="https://github.com/zsh-users/zsh-autosuggestions">zsh-autosuggestions</a> 此插件实现了自动补全语法功能，会自动缓存敲过一次的终端命令，并且在下次输入同样命令的前几个字符时，联想出命令；</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1638166049959.png" alt="" loading="lazy"></figure>
+<ul>
+<li><code>zsh-syntax-highlighting</code>：<a href="https://github.com/zsh-users/zsh-syntax-highlighting">zsh-syntax-highlighting</a> 此插件可以自动分析输入的Linux 及常用命令是否正确；</li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="https://hiwyb.github.io/post-images/1638167911169.gif" alt="" loading="lazy"></figure>
+<ul>
+<li><code>z</code>：<a href="https://github.com/rupa/z">z</a> 此插件实现了自动跳转目录功能，插件会以哈希表的形式自动记录你访问过的路径，在下次访问时，直接输入文件目录的最后一级，按<code>tab</code>即可联想出；</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://hiwyb.github.io/post-images/1638166661179.gif" alt="" loading="lazy"></figure>
+<h2 id="使用">使用</h2>
+<p>使用前本地需安装 <a href="https://github.com/ohmyzsh/ohmyzsh">ohmyzsh</a></p>
+<p>使用  <code>curl</code>, <code>wget</code> 等命令安装。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>curl</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>wget</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>fetch</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(fetch -o - https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>使用GitHub镜像地址安装。 Using this URL instead may be required if you're in a country like China or India (for certain ISPs), that blocks <code>raw.githubusercontent.com</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>curl</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(curl -fsSL https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>wget</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(wget -O- https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>fetch</strong></td>
+<td style="text-align:left"><code>sh -c &quot;$(fetch -o - https://install.ohmyz.sh/)&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>使用<code>upgrade_oh_my_zsh</code>或者<code>omz update</code>命令可以手动更新升级ohmyzsh。</p>
+<p>使用以下脚本自动安装<code>ohmyzsh</code>的常用plugins。脚本自动检测本地是否安装<code>ohmyzsh</code>，如果没安装过，会直接退出；</p>
+<pre><code>#! /bin/bash
+# author: wangyingbo
+# date: 2021-11-26 13:00
+
+# zshrc文件路径
+file_zshrc=~/.zshrc;
+
+echo -e &quot;\n&quot;
+
+files=$(ls ~/.oh-my-zsh 2&gt; /dev/null | wc -l) # 判断目录下是否存在已知后缀名文件
+if [ $files -ne 0 ] ; then 
+	echo -e &quot;\033[32;40m congratulations, the terminal has oh-my-zsh! \033[0m&quot;
+else
+	echo -e &quot;\033[31;40m warning: no oh-my-zsh，please install oh-my-zsh first!!! \033[0m&quot;
+	exit 1
+fi
+
+echo -e &quot;\n&quot;
+echo -e &quot;\033[33;40m will begin install oh-my-zsh plugins，please wait a minute \033[0m&quot;
+echo -e &quot;\n&quot;
+
+# z is exist:方法不可用
+isExistZ() {
+	para=0
+	file=`command -v _z | grep &quot;_z&quot;`
+	echo $file
+	if [[ $file =~ &quot;_z&quot; ]] ; then
+		para=1
+	else
+		echo &quot;&quot;
+	fi
+	return $para
+}
+
+# isExistZ
+# resZ=`echo $?`
+# echo $resZ
+# if [[ $resZ -eq 1 ]]; then
+# 	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+# else
+# 	echo -e &quot;\033[33;40m will begin install plugin z \033[0m&quot;
+# fi
+
+
+newPlugins=&quot;&quot;
+# 安装 plugin z
+if [[ -d ~/.oh-my-zsh/custom/plugins/z ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin z \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/rupa/z.git $ZSH_CUSTOM/plugins/z
+	newPlugins+=&quot; z&quot;
+	echo -e &quot;\033[32;40m have installed the plugin z \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/z ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zerror! \033[0m&quot;
+	exit 1
+fi
+
+# 安装 plugin zsh-autosuggestions
+if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin zsh-autosuggestions \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin zsh-autosuggestions \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+	newPlugins+=&quot; zsh-autosuggestions&quot;
+	echo -e &quot;\033[32;40m have installed the plugin zsh-autosuggestions \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zsh-autosuggestionserror! \033[0m&quot;
+	exit 1
+fi
+
+# 安装 zsh-syntax-highlighting
+if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
+	echo -e &quot;\033[32;40m have installed the plugin zsh-syntax-highlighting \033[0m&quot;
+	echo -e &quot;\n&quot;
+else	
+	echo -e &quot;\033[33;40m will begin install plugin zsh-syntax-highlighting \033[0m&quot;
+	echo -e &quot;\n&quot;
+	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+	newPlugins+=&quot; zsh-syntax-highlighting&quot;
+	echo -e &quot;\033[32;40m have installed the plugin zsh-syntax-highlighting \033[0m&quot;
+fi
+if [[ ! -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
+	echo -e &quot;\033[31;40m error:install plugin zsh-syntax-highlightingerror! \033[0m&quot;
+	exit 1
+fi
+
+# 匹配以plugin开头，以)结尾的字符串
+plugins=`grep &quot;^plugin.*)$&quot; $file_zshrc`
+echo &quot;current plugins: $plugins&quot;
+echo -e &quot;\n&quot;
+
+# newPlugins+=&quot; z&quot;
+# newPlugins+=&quot; zsh-autosuggestions&quot;
+# newPlugins+=&quot; zsh-syntax-highlighting&quot;
+echo &quot;new plugins：$newPlugins&quot;
+echo -e &quot;\n&quot;
+
+# 获取已有的plugin的长度
+oriLength=${#plugins}
+# echo &quot;原来plugins字符串长度是：$oriLength&quot;
+# echo -e &quot;\n&quot;
+replaceIndex=$oriLength-1
+
+# 合并为新的plugins
+replacePlugins=${plugins:0:$replaceIndex}$newPlugins${plugins:$replaceIndex}
+echo &quot;merged plugins：$replacePlugins&quot;
+echo -e &quot;\n&quot;
+
+# 将某个文件中的字符串替换为新字符串 mac环境和linux环境 sed -i 使用不同
+# Mac使用：https://www.cnblogs.com/chunzhulovefeiyue/p/6561497.html
+# Linux使用：https://www.cnblogs.com/A121/p/10621152.html
+
+# eg:把文件中的jack替换成tom，并给源文件添加.backup后缀并备份；添加/g是全部替换，默认每行只替换一次。
+# sed -i &quot;.backup&quot; 's/jack/tom/g' $file_zshrc
+
+sed -i &quot;.backup&quot; &quot;s/$plugins/$replacePlugins/&quot; $file_zshrc
+
+totalPlugins=`grep &quot;^plugin.*)$&quot; $file_zshrc`
+echo &quot;total end plugin: $totalPlugins&quot;
+echo -e &quot;\n&quot;
+
+# 更新 .zshrc 文件
+source $file_zshrc
+
+# 输出脚本执行用时
+echo -e &quot;\n&quot;
+echo -e &quot;\033[32;40m this shell script execution duration(脚本执行时长): ${SECONDS}s  \033[0m&quot;
+
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[利用crontab定时请求网站]]></title>
+        <id>https://hiwyb.github.io/post/li-yong-crontab-ding-shi-qing-qiu-wang-zhan/</id>
+        <link href="https://hiwyb.github.io/post/li-yong-crontab-ding-shi-qing-qiu-wang-zhan/">
+        </link>
+        <updated>2021-11-22T07:36:08.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="ybproxy-auto-request">ybproxy-auto-request</h1>
+<p><a href="https://github.com/wangyingbo/ybproxy-auto-request">GitHub 地址：https://github.com/wangyingbo/ybproxy-auto-request</a></p>
+<h2 id="脚本作用">脚本作用</h2>
+<ul>
+<li>利用github actions 自动访问请求herokuapp和netlify免费服务器的网址；实现herokuapp和netlify免费账号能一直保活。</li>
+<li>会把更新时间插入到recordtime.txt文件里，根据最新时间倒序排列；</li>
+</ul>
+<h2 id="使用">使用</h2>
+<p>如果你有一台Linux主机，或者你有一台不经常关机的Mac，那么你可以利用系统自带的<code>crontab</code>定时任务命令来执行定时任务。</p>
+<p>在终端输入<code>crontab -e</code> 命令，可以进入crontab定时任务编辑页，我们可以在这个文本里利用vim添加一条定时任务<code>crontab.sh</code>，添加完毕用<code>wq</code>保存退出；</p>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1637566962477.png" alt="" loading="lazy"></figure>
+<p>添加成功以后，可利用<code>crontab -l</code>命令查看添加的任务；</p>
+<figure data-type="image" tabindex="2"><img src="https://hiwyb.github.io/post-images/1637566978330.png" alt="" loading="lazy"></figure>
+<p>添加成功以后，需要重启cron进程：</p>
+<pre><code>service crond restart
+</code></pre>
+<p>可查看crontab的执行日志：</p>
+<pre><code>cat /var/log/cron
+
+</code></pre>
+<h2 id="crontabsh脚本如下">crontab.sh脚本如下：</h2>
+<pre><code>#!/bin/bash
+# author wangyingbo
+
+cd /root/Desktop/Projects/ybproxy-auto-request
+git pull --rebase
+DATE=`date +%Y%m%d%H%M%S`
+echo &quot;current git push time: $DATE&quot;
+# 插入到最后一行
+# echo $DATE &gt;&gt; ./recordtime.txt
+# 插入到第一行
+sed -i &quot;1i$DATE&quot; ./recordtime.txt
+git add recordtime.txt
+git commit --allow-empty -m &quot; update auto request ybproxy&quot;
+git push 
+sleep 1
+echo -e &quot;\033[33;40m  ($0) ${TIME}: this shell script execution duration: ${SECONDS}s  \033[0m&quot;
+echo &quot;😊😊😊😊😊😊success excute shell😊😊😊😊😊😊&quot;
+
+</code></pre>
+]]></content>
+    </entry>
+</feed>

@@ -1,0 +1,288 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>保持GitHub 常绿 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1740393591324">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="保持GitHub 常绿 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="auto-green
+自动保持 GitHub 提交状态常绿。
+
+a commit a day keeps your girlfriend away.
+
+GitHub地址: https://github.com/wangyingbo/yb-a..." />
+    <meta name="keywords" content="GitHub" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1740393591324" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              保持GitHub 常绿
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-11-22
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+                <a href="https://hiwyb.github.io/tag/EtiZT3XPY/" class="post-tag">
+                  # GitHub
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://hiwyb.github.io/post-images/bao-chi-github-chang-lu.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="auto-green">auto-green</h1>
+<p>自动保持 GitHub 提交状态常绿。</p>
+<blockquote>
+<p>a commit a day keeps your girlfriend away.</p>
+</blockquote>
+<h2 id="github地址-httpsgithubcomwangyingboyb-auto-green">GitHub地址: <a href="https://github.com/wangyingbo/yb-auto-green">https://github.com/wangyingbo/yb-auto-green</a></h2>
+<h2 id="原理">原理</h2>
+<p>使用 GitHub Actions 的定时任务功能，每隔一段时间自动执行 <code>git commit</code>，提交信息为 &quot;a commit a day keeps your girlfriend away&quot;，灵感来自知乎问题<a href="https://www.zhihu.com/question/34043434/answer/57826281">在 GitHub 上保持 365 天全绿是怎样一种体验？</a>下某匿名用户的回答：</p>
+<blockquote>
+<p>曾经保持了 200 多天全绿，但是冷落了女朋友，一直绿到现在。</p>
+</blockquote>
+<h2 id="使用">使用</h2>
+<ul>
+<li>点右上角 <strong>Use this template</strong> 按钮复制本 GitHub 仓库，<strong>⚠️ 千万不要 Fork，因为 fork 项目的动态并不会让你变绿 ⚠️</strong></li>
+<li>修改 <a href="https://github.com/justjavac/auto-green/blob/master/.github/workflows/ci.yml#L19">ci.yml 文件的第 19、20 行</a> 为自己的 GitHub 账号和昵称</li>
+<li>(可选) 你可以通过修改 <a href="https://github.com/justjavac/auto-green/blob/master/.github/workflows/ci.yml#L8">ci.yml 文件的第 8 行</a>来调整频率</li>
+</ul>
+<p>计划任务语法有 5 个字段，中间用空格分隔，每个字段代表一个时间单位。</p>
+<pre><code class="language-plain">┌───────────── 分钟 (0 - 59)
+│ ┌───────────── 小时 (0 - 23)
+│ │ ┌───────────── 日 (1 - 31)
+│ │ │ ┌───────────── 月 (1 - 12 或 JAN-DEC)
+│ │ │ │ ┌───────────── 星期 (0 - 6 或 SUN-SAT)
+│ │ │ │ │
+│ │ │ │ │
+│ │ │ │ │
+* * * * *
+</code></pre>
+<p>每个时间字段的含义：</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>描述</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*</code></td>
+<td>任意值</td>
+<td><code>* * * * *</code> 每天每小时每分钟</td>
+</tr>
+<tr>
+<td><code>,</code></td>
+<td>值分隔符</td>
+<td><code>1,3,4,7 * * * *</code> 每小时的 1 3 4 7 分钟</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>范围</td>
+<td><code>1-6 * * * *</code> 每小时的 1-6 分钟</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>每</td>
+<td><code>*/15 * * * *</code> 每隔 15 分钟</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注</strong>：由于 GitHub Actions 的限制，如果设置为 <code>* * * * *</code> 实际的执行频率为每 5 分执行一次。</p>
+<h2 id="自动执行crontabsh配置">自动执行crontab.sh配置</h2>
+<pre><code>#!/bin/bash
+# author wangyingbo
+
+echo &quot;--------current path:-------&quot;
+echo $PWD
+cd $PWD
+
+git pull --rebase
+git commit --allow-empty -m &quot;a commit a day keeps your girlfriend away&quot;
+git push
+
+sleep 1
+echo -e &quot;\033[33;40m  ($0) ${TIME}: this shell script execution duration: ${SECONDS}s  \033[0m&quot;
+echo &quot;😊😊😊😊😊😊success excute shell😊😊😊😊😊😊&quot;
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#auto-green">auto-green</a>
+<ul>
+<li><a href="#github%E5%9C%B0%E5%9D%80-httpsgithubcomwangyingboyb-auto-green">GitHub地址: https://github.com/wangyingbo/yb-auto-green</a></li>
+<li><a href="#%E5%8E%9F%E7%90%86">原理</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a></li>
+<li><a href="#%E8%87%AA%E5%8A%A8%E6%89%A7%E8%A1%8Ccrontabsh%E9%85%8D%E7%BD%AE">自动执行crontab.sh配置</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/linux-zhu-ji-mei-ri-xun-jian-jiao-ben/">
+              <h3 class="post-title">
+                Linux 主机每日巡检脚本
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

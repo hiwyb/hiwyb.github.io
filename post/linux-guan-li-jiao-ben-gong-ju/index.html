@@ -1,0 +1,528 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux 管理脚本工具 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1740393591324">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Linux 管理脚本工具 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="这个 shell 脚本，实现了多个 Linux 系统管理任务的功能，适合用于快速管理和维护 Linux 系统。主要包含以下功能：
+
+进程管理：列出当前正在运行的进程、杀死指定进程、按照端口号杀死进程。
+磁盘管理：查看磁盘使用情况、清理磁盘空..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1740393591324" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Linux 管理脚本工具
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-04-13
+              </span>
+              <span>
+                6 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>这个 shell 脚本，实现了多个 Linux 系统管理任务的功能，适合用于快速管理和维护 Linux 系统。主要包含以下功能：</p>
+<ul>
+<li>进程管理：列出当前正在运行的进程、杀死指定进程、按照端口号杀死进程。</li>
+<li>磁盘管理：查看磁盘使用情况、清理磁盘空间。</li>
+<li>网络管理：查看网络连接、配置网络接口、查询端口信息、扫描局域网设备。</li>
+<li>日志分析：查看系统日志、筛选关键字、保存日志。</li>
+<li>用户管理：查看用户列表、添加用户、删除用户、修改用户密码。</li>
+<li>安全管理：修改 SSH 端口、禁止 ROOT 登录。</li>
+<li>系统信息：查看操作系统、内核版本、CPU 信息、内存信息和磁盘信息。</li>
+<li>定时任务：查看当前用户的定时任务。</li>
+</ul>
+<pre><code>#!/bin/bash
+# author wangyingbo
+# date:2023-04-13 pm 20:30
+
+# 判断系统类型，选择合适的包管理器
+if [ -n &quot;$(command -v yum)&quot; ]; then
+  PKGMGR=&quot;yum&quot;
+elif [ -n &quot;$(command -v apt-get)&quot; ]; then
+  PKGMGR=&quot;apt-get&quot;
+else
+  echo &quot;无法确认系统类型，请手动安装软件包。&quot;
+  exit 1
+fi
+
+# 安装必需的工具和软件包
+for TOOL in curl tar zstd unzip; do
+  if ! command -v $TOOL &gt; /dev/null; then
+    sudo $PKGMGR install -y $TOOL
+  fi
+done
+
+# 菜单文字提示
+function menu() {
+  cat &lt;&lt; EOF
+=========================================
+           Linux 系统管理工具            
+=========================================
+1. 进程管理
+2. 磁盘管理
+3. 网络管理
+4. 日志分析
+5. 用户管理
+6. 安全管理
+7. 系统信息
+8. 定时任务
+0. 退出
+=========================================
+EOF
+  read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+}
+
+# 进程管理
+function process_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               进程管理                  
+-----------------------------------------
+1. 列出所有进程
+2. 杀死指定进程
+3. 按照端口杀死进程
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        ps aux
+        ;;
+      2)
+        read -p &quot;请输入要杀死的进程 ID：&quot; PID
+        kill $PID
+        ;;
+      3)
+        read -p &quot;请输入要杀死的端口号：&quot; PORT
+        sudo fuser -k $PORT/tcp
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 磁盘管理
+function disk_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               磁盘管理                  
+-----------------------------------------
+1. 查看磁盘使用情况
+2. 清理磁盘空间
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        df -h
+        ;;
+      2)
+        read -p &quot;请输入要清理的文件路径：&quot; PATH
+        sudo find $PATH -type f -mtime +30 -delete
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 网络管理
+function network_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               网络管理                  
+-----------------------------------------
+1. 查看网络连接
+2. 配置网络接口
+3. 查询端口信息
+4. 扫描局域网设备
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        netstat -anp
+        ;;
+      2)
+        sudo nano /etc/network/interfaces
+        ;;
+      3)
+        read -p &quot;请输入要查询的端口号：&quot; PORT
+        sudo lsof -i:$PORT
+        ;;
+      4)
+        read -p &quot;请输入 IP 地址范围（例如：192.168.1.1/24）：&quot; IP_RANGE
+        sudo nmap -sP $IP_RANGE
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 日志分析
+function log_analysis() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               日志分析                  
+-----------------------------------------
+1. 查看系统日志
+2. 筛选关键字
+3. 保存日志
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        cat /var/log/syslog
+        ;;
+      2)
+        read -p &quot;请输入要筛选的关键字：&quot; KEYWORD
+        cat /var/log/syslog | grep $KEYWORD
+        ;;
+      3) 
+        read -p &quot;请输入要保存的文件路径：&quot; FILEPATH
+        cat /var/log/syslog &gt; $FILEPATH
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 用户管理
+function user_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               用户管理                  
+-----------------------------------------
+1. 查看用户列表
+2. 添加用户
+3. 删除用户
+4. 修改用户密码
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        cat /etc/passwd
+        ;;
+      2)
+        read -p &quot;请输入新用户的用户名：&quot; USERNAME
+        sudo adduser $USERNAME
+        ;;
+      3)
+        read -p &quot;请输入要删除的用户的用户名：&quot; USERNAME
+        sudo userdel -r $USERNAME
+        ;;
+      4)
+        read -p &quot;请输入要修改密码的用户名：&quot; USERNAME
+        sudo passwd $USERNAME
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 安全管理
+function security_mgmt() {
+  while true
+  do
+    cat &lt;&lt; EOF
+-----------------------------------------
+               安全管理                  
+-----------------------------------------
+1. 修改 SSH 端口
+2. 禁止 ROOT 登录
+0. 返回上一级菜单
+-----------------------------------------
+EOF
+    read -p &quot;请输入数字选择相应的菜单：&quot; CHOICE
+    case $CHOICE in
+      1)
+        read -p &quot;请输入新的 SSH 端口号：&quot; PORT
+        sudo sed -i &quot;s/Port .*/Port $PORT/g&quot; /etc/ssh/sshd_config
+        sudo service sshd restart
+        ;;
+      2)
+        sudo sed -i &quot;s/PermitRootLogin yes/PermitRootLogin no/g&quot; /etc/ssh/sshd_config
+        sudo service sshd restart
+        ;;
+      0)
+        break
+        ;;
+      *)
+        echo &quot;错误的选择。&quot;
+        ;;
+    esac
+  done
+}
+
+# 系统信息
+function system_info() {
+  cat &lt;&lt; EOF
+=========================================
+               系统信息                  
+=========================================
+操作系统：$(lsb_release -d | cut -f2-)
+内核版本：$(uname -r)
+CPU 信息：$(grep &quot;model name&quot; /proc/cpuinfo | head -n1 | cut -d: -f2-)
+内存信息：$(free -h | awk 'NR==2 {print $2}')
+磁盘信息：$(df -h | awk '$NF==&quot;/&quot; {print &quot;总容量：&quot; $2 &quot;, 剩余容量：&quot; $4}')
+=========================================
+EOF
+}
+
+# 定时任务
+function cron_job() {
+  crontab -l
+}
+
+# 主循环
+while true
+do
+  menu
+  case $CHOICE in
+    1)
+      process_mgmt
+      ;;
+    2)
+      disk_mgmt
+      ;;
+    3)
+      network_mgmt
+      ;;
+    4)
+      log_analysis
+      ;;
+    5)
+      user_mgmt
+      ;;
+    6)
+      security_mgmt
+      ;;
+    7)
+      system_info
+      ;;
+    8)
+      cron_job
+      ;;
+    0)
+      echo &quot;谢谢使用，再见！&quot;
+      exit 0
+      ;;
+    *)
+      echo &quot;错误的选择。&quot;
+      ;;
+  esac
+done
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/pei-zhi-zhong-duan-zou-dai-li-de-jiao-ben/">
+              <h3 class="post-title">
+                Mac终端配置代理的脚本
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

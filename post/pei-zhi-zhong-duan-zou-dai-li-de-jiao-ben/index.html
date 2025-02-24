@@ -1,0 +1,328 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mac终端配置代理的脚本 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1740393591324">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Mac终端配置代理的脚本 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="GitHub仓库地址 YBScripts
+点击下面链接  install_proxy.sh
+鼠标右键另存为install_proxy.sh，对下载下来的文件执行加权命令：
+chmod 777 install_proxy.sh
+
+然后直接执行..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1740393591324" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Mac终端配置代理的脚本
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-03-07
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://hiwyb.github.io/post-images/pei-zhi-zhong-duan-zou-dai-li-de-jiao-ben.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>GitHub仓库地址 <a href="https://github.com/wangyingbo/YBScripts">YBScripts</a></p>
+<p>点击下面链接  <a href="https://raw.githubusercontent.com/wangyingbo/YBScripts/main/install_proxy.sh">install_proxy.sh</a></p>
+<p>鼠标右键另存为<code>install_proxy.sh</code>，对下载下来的文件执行加权命令：</p>
+<pre><code>chmod 777 install_proxy.sh
+</code></pre>
+<p>然后直接执行脚本：</p>
+<pre><code>./install_proxy.sh
+
+</code></pre>
+<p><strong>Mac终端快速开启代理脚本使用说明</strong></p>
+<p>打开Mac 上的代理软件，并打开代理开关；</p>
+<p>执行脚本，根据提示输入，提示 <code>please input shortcut command of start proxy:</code>时，输入在终端开启代理的命令，如果直接回车，默认为<code>startproxy</code>；</p>
+<p>提示<code>please input shortcut command of end proxy:</code>时，输入在终端关闭代理的命令，如果直接回车，默认为<code>endproxy</code>；</p>
+<p>提示<code>please input proxy port:</code>时，输入你的翻墙软件开启的代理端口，如<code>ClashX</code>默认端口为<code>7890</code>，如果直接回车，默认端口为<code>7890</code>；</p>
+<p>关闭终端窗口重新打开，或者执行<code>source ~/.zshrc</code> 或者 <code>source ~/.bashrc</code> 来立即应用环境变量；脚本运行完以后可删除此脚本；</p>
+<p>脚本会在 zsh 的配置文件 <code>~/.zshrc</code> 和 bash 的配置文件 <code>~/.bashrc</code> 中生成 alias 命令，脚本执行完以后，在代理软件打开的情况下，可使用配置的 <code>startproxy</code> 命令和 <code>endproxy</code> 命令来快速开启和关闭终端代理；</p>
+<p>执行 <code>startproxy</code> 输出结果如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://hiwyb.github.io/post-images/1678205685824.png" alt="" loading="lazy"></figure>
+<p>可通过以下语句打印当前的代理：</p>
+<pre><code>echo -e &quot;\n $http_proxy \n $https_proxy \n $all_proxy&quot;
+</code></pre>
+<p>脚本内容预览：</p>
+<pre><code>#!/bin/bash
+# author wangyingbo
+# date:2023-03-07 pm 16:30
+
+port='' # 端口号
+startProxy='' # 开启代理的快捷命令
+endProxy='' # 结束代理的快捷命令
+pathzsh=~/.zshrc
+pathbash=~/.bashrc
+TIME=$(date &quot;+%Y-%m-%d %H:%M:%S&quot;)
+_DIR_=`pwd`
+# pathzsh=$_DIR_/zshrc.txt
+# pathbash=$_DIR_/bashrc.txt
+
+green(){
+	echo -e &quot;\033[32;40m $1 \033[0m&quot;
+}
+red(){
+	echo -e &quot;\033[31;40m $1 \033[0m&quot;
+}
+yellow(){
+	echo -e &quot;\033[33;40m $1 \033[0m&quot;
+}
+
+read -p &quot;please input shortcut command of start proxy:&quot; startProxy
+if [[ -z $startProxy ]]; then
+	yellow &quot;default start proxy command is 'startproxy'&quot;
+	startProxy='startproxy'
+else
+	green &quot;start proxy command is '$startProxy'&quot;
+fi
+
+read -p &quot;please input shortcut command of end proxy:&quot; endProxy
+if [[ -z $endProxy ]]; then
+	yellow &quot;default end proxy command is 'endproxy'&quot;
+	endProxy='endproxy'
+else
+	green &quot;end proxy command is '$endProxy'&quot;
+fi
+
+read -p &quot;please input proxy port:&quot; port
+if [[ -z $port ]]; then
+	yellow &quot;default proxy port is 7890&quot;
+	port='7890'
+else
+	green &quot;proxy port is '$port'&quot;
+fi
+
+sleep 0.25
+
+genproxy(){
+	echo -e &quot;\n&quot; &gt;&gt; $1
+	PROXYURL=http://127.0.0.1
+	PROXYPORT=$port
+	cat &gt;&gt; $1 &lt;&lt;PROXYEOF
+# 设置代理
+alias $startProxy=&quot;export http_proxy=$PROXYURL:$PROXYPORT https_proxy=$PROXYURL:$PROXYPORT;echo &quot;设置代理成功&quot;;#curl cip.cc&quot;
+# 取消代理
+alias $endProxy=&quot;unset http_proxy https_proxy;echo &quot;取消代理&quot;;#curl cip.cc&quot;
+PROXYEOF
+}
+
+bashExist=$(grep $startProxy $pathbash)
+zshExist=$(grep $startProxy $pathzsh)
+if [[ -z $zshExist ]]; then
+	echo &quot;&quot;
+else
+	red &quot;\n&quot;
+	red &quot;zsh alias proxy command has existed!&quot;
+	exit 1
+fi
+if [[ -z $bashExist ]]; then
+	echo &quot;&quot;
+else
+	red &quot;\n&quot;
+	red &quot;bash alias proxy command has existed!&quot;
+	exit 0
+fi
+
+shellsource=''
+if [ -n &quot;`$SHELL -c 'echo $BASH_VERSION'`&quot; ]; then
+   # assume Bash
+   shellsource='sh'
+elif [ -n &quot;`$SHELL -c 'echo $ZSH_VERSION'`&quot; ]; then
+   # assume Zsh
+   shellsource='zsh'
+else
+   # something else like fish
+   echo &quot;&quot;
+fi
+
+if [[ -e $pathzsh ]]; then
+	genproxy $pathbash
+	$shellsource $pathbash
+	green &quot;write proxy command to ${pathzsh##*/} successfully!&quot;
+fi
+
+if [[ -e $pathbash ]]; then
+	genproxy $pathzsh
+	$shellsource $pathzsh
+	green &quot;write proxy command to ${pathbash##*/} successfully!&quot;
+fi
+
+# shell excute time
+echo &quot;&quot;
+green &quot;${TIME} ($0): this shell script execution duration: ${SECONDS}s&quot;
+echo &quot;&quot;
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/js-xiao-yan-yuan-sheng-ke-hu-duan-ri-zhi-kai-fa/">
+              <h3 class="post-title">
+                js校验原生客户端日志开发
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

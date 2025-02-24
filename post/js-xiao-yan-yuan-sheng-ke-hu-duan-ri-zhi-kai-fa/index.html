@@ -1,0 +1,357 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>js校验原生客户端日志开发 | 秋林</title>
+<link rel="shortcut icon" href="https://hiwyb.github.io/favicon.ico?v=1740393591324">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://hiwyb.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="js校验原生客户端日志开发 | 秋林 - Atom Feed" href="https://hiwyb.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="video_js_template
+工程编译与使用
+工程编译
+
+使用./wbinit.sh脚本，安装本工程需要的相关依赖；
+使用npm run webpack，调用./wbnpx.sh脚本进行webpack打包；使用node ./dist/..." />
+    <meta name="keywords" content="JavaScript,shell" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://hiwyb.github.io">
+  <img class="avatar" src="https://hiwyb.github.io/images/avatar.png?v=1740393591324" alt="">
+  </a>
+  <h1 class="site-title">
+    秋林
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              js校验原生客户端日志开发
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-10-28
+              </span>
+              <span>
+                12 min read
+              </span>
+              
+                <a href="https://hiwyb.github.io/tag/YzrlZJaYH/" class="post-tag">
+                  # JavaScript
+                </a>
+              
+                <a href="https://hiwyb.github.io/tag/DWwfs7VRV/" class="post-tag">
+                  # shell
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://hiwyb.github.io/post-images/js-xiao-yan-yuan-sheng-ke-hu-duan-ri-zhi-kai-fa.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="video_js_template">video_js_template</h1>
+<h2 id="工程编译与使用">工程编译与使用</h2>
+<h3 id="工程编译">工程编译</h3>
+<ul>
+<li>使用<code>./wbinit.sh</code>脚本，安装本工程需要的相关依赖；</li>
+<li>使用<code>npm run webpack</code>，调用<code>./wbnpx.sh</code>脚本进行webpack打包；使用<code>node ./dist/bundle.js</code>可执行打包后的<code>bundle.js</code>文件；</li>
+<li>使用<code>npm run build</code>，内部调用<code>./wbnpx.sh;./wbversion.sh build</code>脚本进行webpack打包，同时打出来的<code>bundle.js</code>会生成version版本变量，可使用<code>npm run build 2</code>来指定build号为2，不传build号则版本信息里的build号会自增；版本信息存储在<code>version.data</code>文件中；</li>
+<li>使用<code>npm run release</code>，调用<code>./wbnpx.sh;./wbversion.sh release</code>脚本进行webpack打包，同时打出来的<code>bundle.js</code>会生成version版本变量，可利用<code>npm run release 1.0</code>命令指定版本号，如果不传版本号会展示最后一次的version号；如果本地安装了<code>wbcompile</code>工具，在使用<code>npm run release xx</code>时会直接上传<code>bundle.js</code>到ftp对应目录下；</li>
+<li>使用<code>npm run start</code>可启动<code>nodemon</code>服务，此服务会监听工程目录下的<code>/tscompile</code>文件夹文件的改动，若有更改时自动运行项目；</li>
+<li>使用<code>npm run tscompile</code>触发编译或者<code>Command + shift + b</code>手动触发<code>tasks.json</code>任务，可编译/src/下的所有ts文件，把编译后的中间产物输出到<code>/tscompile</code>文件夹下，如果开启了<code>nodemon</code>服务，会自动触发nodemon的watch事件，触发热更新；配置了<code>launch.json</code>文件，可使用VSCode自带的<code>运行和调试（command + shift + D）</code>对项目中的具体代码进行断点和调试开发；</li>
+<li>使用<code>npm run dev</code>，打开本地server，方便利用chrome调试；</li>
+<li>终端 -&gt; 运行任务 -&gt; 显示所有任务 -&gt; tsc:监视 - tsconfig.json，可以动态编译ts；</li>
+</ul>
+<h2 id="设计思路">设计思路</h2>
+<h3 id="整体流程">整体流程</h3>
+<ul>
+<li>使用<code>Node</code>框架开发 js 校验逻辑，然后通过<code>webpack</code>把所有js逻辑打包成<code>bundle.js</code>代码，通过编写的<code>wbcompile.sh</code>脚本，使用<code>wbcompile -u</code>命令把<code>bundle.js</code>文件上传到ftp服务器；</li>
+<li>业务方可使用<code>wbcompile -t</code>创建日志校验模板，模板支持<code>json</code>、<code>.ts</code>、<code>js</code>模板文件，编写完模板文件后，可使用<code>wbcompile -i xxx.ts -o path/to/js/directory</code>命令编译<code>ts</code>文件为<code>js</code>文件；</li>
+<li>端上从ftp服务器拉取<code>bundle.js</code>代码，执行此js文件，获取js运行环境；</li>
+<li>端上根据自己的业务判断，从ftp服务器上拉取自己的日志校验模板，获取模板文件的内容，即字符串；</li>
+<li>调用<code>bundle.js</code>里的函数，把当前的业务日志json和这条日志对应的js模板字符串作为调用函数的参数，可获取到校验结果，校验结果为json格式字符串；</li>
+<li>日志校验模版支持 <code>DSL</code> 表达式，<code>bundle.js</code> 会解析 <code>DSL</code> 文件生成 <code>AST</code> ，并根据运算符优先级解释执行；</li>
+<li>日志校验模版支持正则表达式校验；</li>
+<li>日志校验模版支持<code>js函数</code>校验（js模版）及<code>js函数字符串</code>校验（json模版）；</li>
+<li>根据返回的校验结果，端上做UI显示；</li>
+</ul>
+<h3 id="初步解决方案">初步解决方案</h3>
+<p>参见具体业务代码；</p>
+<h2 id="js校验api介绍">js校验api介绍</h2>
+<p><strong>校验工具暴露出的接口如下</strong></p>
+<ul>
+<li><code>loadTemplate(code: string)</code>: 加载模板字符串，参数为模板字符串，可以为json或者js模板字符串，内部会自动判断；</li>
+<li><code>loadJSTemplate(code: string)</code>: 参数为动态下发的js文件的模板字符串；可把需要的js模板文件加载执行；</li>
+<li><code>loadJsonTemplate(jsonString: string)</code>: 参数为下发的json格式的模板字符串；加载json模板；</li>
+<li><code>checkFunction(log: string, context: string)</code>: 第一个参数为需要校验的json字符串，第二个参数为需要增量结合模板校验的context；</li>
+<li><code>loadJSTemplateAndExecute(code: string, log: string, context: string)</code>: 加载单个js模板，并立即执行校验；</li>
+<li><code>loadJsonTemplateAndExecute(jsonString: string, log: string, context: string)</code>: 加载单个json模板，并立即执行校验；</li>
+</ul>
+<p><strong><code>loadTemplate</code>、<code>loadJSTemplate</code>、<code>loadJsonTemplate</code> 这三个方法的返回值是json数组，示例如下：</strong></p>
+<pre><code>[{&quot;id&quot;:&quot;799&quot;,&quot;items&quot;:[{&quot;name&quot;:&quot;uicode&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;^[0-9]+$&quot;},{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;},{&quot;name&quot;:&quot;friend&quot;,&quot;logic&quot;:1,&quot;rule&quot;:&quot;hi amigo #$$#, my name is #$placeholder$#, my age is #$p$#，see you!&quot;},{&quot;name&quot;:&quot;source_info&quot;,&quot;rule&quot;:&quot;(@mid &gt;= 0) &amp;&amp; (@source_info include 'face_sign_1')&quot;},{&quot;name&quot;:&quot;mid&quot;,&quot;logic&quot;:4},{&quot;name&quot;:&quot;ext&quot;,&quot;sub&quot;:[{&quot;name&quot;:&quot;objectid&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;^[0-9]{1,}(:|.{3})[0-9]+$&quot;},{&quot;name&quot;:&quot;authorid&quot;,&quot;logic&quot;:3,&quot;rule&quot;:&quot;[0-9]{1,}$&quot;}]}]},{&quot;id&quot;:&quot;template123&quot;,&quot;items&quot;:[{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;}]},{&quot;items&quot;:[{&quot;name&quot;:&quot;fid&quot;,&quot;rule&quot;:&quot;@fid == 232673&quot;}],&quot;id&quot;:&quot;template456&quot;}]
+
+</code></pre>
+<p><strong><code>checkFunction</code>、<code>loadJSTemplateAndExecute</code>、<code>loadJsonTemplateAndExecute</code> 三个方法的返回值为json，示例如下：</strong></p>
+<pre><code>
+{&quot;success&quot;:true,&quot;code&quot;:1,&quot;reason&quot;:&quot;&quot;,&quot;results&quot;:[{&quot;key&quot;:&quot;uicode&quot;,&quot;value&quot;:&quot;10001344&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;^[0-9]+$&quot;},{&quot;key&quot;:&quot;fid&quot;,&quot;value&quot;:&quot;232673&quot;,&quot;success&quot;:true,&quot;logic&quot;:&quot;&quot;,&quot;required&quot;:false,&quot;rule&quot;:&quot;@fid == 232673&quot;},{&quot;key&quot;:&quot;friend&quot;,&quot;value&quot;:&quot;zjd&quot;,&quot;success&quot;:true,&quot;logic&quot;:1,&quot;required&quot;:false,&quot;rule&quot;:&quot;hi amigo zjd, my name is wyb, my age is 18，see you!&quot;},{&quot;key&quot;:&quot;source_info&quot;,&quot;value&quot;:&quot;face_sign_1&quot;,&quot;success&quot;:true,&quot;logic&quot;:&quot;&quot;,&quot;required&quot;:false,&quot;rule&quot;:&quot;(@mid &gt;= 0) &amp;&amp; (@source_info include 'face_sign_1')&quot;},{&quot;key&quot;:&quot;mid&quot;,&quot;value&quot;:&quot;4805675316939808&quot;,&quot;success&quot;:true,&quot;logic&quot;:4,&quot;required&quot;:false,&quot;rule&quot;:&quot;Function: e=&gt;!!e.mid&amp;&amp;/^[0-9]+$/.test(e.mid)&quot;},{&quot;key&quot;:&quot;objectid&quot;,&quot;value&quot;:&quot;1034%3A4805674547478607&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;^[0-9]{1,}(:|.{3})[0-9]+$&quot;},{&quot;key&quot;:&quot;authorid&quot;,&quot;value&quot;:&quot;7168897192&quot;,&quot;success&quot;:true,&quot;logic&quot;:3,&quot;required&quot;:false,&quot;rule&quot;:&quot;[0-9]{1,}$&quot;}]}
+
+</code></pre>
+<h2 id="工具脚本的使用">工具脚本的使用</h2>
+<p>使用下面命令安装配套的脚本工具：</p>
+<pre><code>
+# 一键安装wbcompile.sh脚本
+sudo curl http://ftp.client.weibo.cn/UI_Image/Video/ShellTools/installwbcompile.sh | sh
+
+</code></pre>
+<p><code>wbcompile</code>脚本具有处理新建日志模板、编译commonJS文件、上传ftp等功能，具体可通过<code>wbcompile -h</code>查看帮助命令；常用方法总结如下：</p>
+<ul>
+<li><code>wbcompile -t templateName</code>可在当前执行脚本的目录下生成<code>templateName.ts</code>模板文件，可根据需求修改模板文件保存；</li>
+<li><code>wbcompile -i inputFile(inputDir) -o outputDir</code> 或者 <code>wbcompile inputFile(inputDir) outputDir</code>命令对需要编译的文件进行编译，支持对<code>typescript</code>和<code>ES6</code>文件进行统一编译成<code>ES5</code>规范； -i 是需要编译的文件或文件夹，如果 -i 参数为文件夹，支持递归遍历子目录编译；-o 是编译后输出的文件路径；</li>
+<li><code>wbcompile -u file</code>调用上传命令，上传编译好的ES5文件到ftp服务器；</li>
+</ul>
+<h2 id="日志模板的定义">日志模板的定义</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">property</th>
+<th style="text-align:center">含义</th>
+<th style="text-align:center">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:center">需要校验的字段名，如uicode；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">required</td>
+<td style="text-align:center">是否是必须字段，即如果校验失败是否抛异常；默认是false；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">sub</td>
+<td style="text-align:center">如果验证的字段是复合型，比如ext字段，则支持多级嵌套；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">logic</td>
+<td style="text-align:center">逻辑关系，值含义枚举：0：表达式解析；1：包含；2：相等；3：正则；4：js函数；</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left">rule</td>
+<td style="text-align:center">和logic绑定关系，需要用来校验的rule；</td>
+<td style="text-align:center">logic为4时，rule为函数或者函数字符串，会调用rule函数来判断校验结果，参数为整个json转成的对象；logic为0或者不传时，默认使用表达式解析规则；可支持常用一元、二元操作符以及逻辑关系；</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<p><strong>rule支持placeholder功能，可使用<code>#$ here-could-be-anystring $#</code>包括起来的占位符来进行占位，在context传进来时替换占位符，如代码所示：</strong></p>
+<pre><code>// 如context 有个friend字段，需要动态拼接rule规则，可按下面示例所示构建rule，可用逗号分割多个值替换多个占位符
+var context = '{&quot;friend&quot;:&quot;zjd,wyb,18&quot;}';
+
+// 字段名和有placeholder的校验规则
+{
+    name:&quot;friend&quot;,
+    rule:&quot;hi amigo #$$#, my name is #$placeholder$#, my age is #$p$#，see you!&quot;
+}
+
+// 最终拼接好的用来校验的rule
+hi amigo zjd, my name is wyb, my age is 18，see you!
+
+</code></pre>
+<h2 id="遇到的问题和解决办法">遇到的问题和解决办法</h2>
+<ul>
+<li>原生<code>JSContext</code>不支持执行多个 <code>es6 js</code>文件，需要合并 <code>es6 js</code> 文件；</li>
+<li>使用<code>webpack</code>解决多个js文件合并问题，但是使用<code>webpack</code>的<code>bundle.js</code>文件是直接执行的匿名函数，一些export的方法名原生执行不到；</li>
+<li>编写<code>wbnpx.sh</code>脚本，对webpack生成的<code>bundle.js</code>文件做处理。匹配入口文件<code>app.js</code>中需要导出的对象，在bundle.js里直接写入；</li>
+<li>项目中js语法太过灵活，无法做类型定义，项目整体切换到<code>typescript</code>；</li>
+<li>单个js文件中可包含多个校验模板，模板和校验<code>log</code>逻辑拆分；</li>
+<li>利用<code>eval()</code>函数动态执行js文件字符串或者json模板字符串，可动态下发js代码执行；</li>
+<li>校验逻辑新增规则，可在js模板里定义一个<code>function</code>对象或者<code>function字符串</code>来进行校验，利用eval函数动态校验规则；同理json模板里也可返回<code>function字符串</code>；function的参数为<code>json转成的对象</code>；</li>
+<li>编写<code>wbcompile.sh</code>脚本，脚本可以生成模板文件，执行<code>ts文件</code>和<code>es6文件</code>转为<code>es5文件</code>，支持递归遍历子目录编译；支持直接上传ftp服务器；</li>
+<li>增加表达式解析规则，支持常用逻辑表达式解析，根据<code>LL(1)递归下降词法算法</code>编写解析器，读取输入表达式生成AST语法树，操作语法树节点运算校验；表达式支持一元、二元操作符，支持逻辑关系，支持变量的使用，示例如：<code>(@mid === (1+2+3)*2-5) &amp;&amp; (@source_info include 'face_sign_1')</code>；</li>
+<li>编写版本管理脚本，记录每次build行为，保存为<code>version.data</code>便于读取；支持build号自增，支持指定<code>release version</code>；</li>
+<li>在使用<code>wbcompile -u</code>上传本地创建好的模板文件时，先通过ftp拉取已经存在的模板配置<code>configurationtable.json</code>文件；通过脚本创建中间处理文件<code>temp_merge_table.js</code>，把模板js文件的内容直接输入到<code>temp_merge_table.js</code>文件中，把<code>configurationtable.json</code>配置文件的json字符串通过脚本转为<code>temp_merge_table.js</code>中的一个变量，然后通过编写代码做配置文件的合并；合并完成以后生成新的<code>configurationtable.json</code>文件，上传到ftp对应目录下；</li>
+<li>done.</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#video_js_template">video_js_template</a>
+<ul>
+<li><a href="#%E5%B7%A5%E7%A8%8B%E7%BC%96%E8%AF%91%E4%B8%8E%E4%BD%BF%E7%94%A8">工程编译与使用</a>
+<ul>
+<li><a href="#%E5%B7%A5%E7%A8%8B%E7%BC%96%E8%AF%91">工程编译</a></li>
+</ul>
+</li>
+<li><a href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF">设计思路</a>
+<ul>
+<li><a href="#%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B">整体流程</a></li>
+<li><a href="#%E5%88%9D%E6%AD%A5%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">初步解决方案</a></li>
+</ul>
+</li>
+<li><a href="#js%E6%A0%A1%E9%AA%8Capi%E4%BB%8B%E7%BB%8D">js校验api介绍</a></li>
+<li><a href="#%E5%B7%A5%E5%85%B7%E8%84%9A%E6%9C%AC%E7%9A%84%E4%BD%BF%E7%94%A8">工具脚本的使用</a></li>
+<li><a href="#%E6%97%A5%E5%BF%97%E6%A8%A1%E6%9D%BF%E7%9A%84%E5%AE%9A%E4%B9%89">日志模板的定义</a></li>
+<li><a href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E5%92%8C%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95">遇到的问题和解决办法</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://hiwyb.github.io/post/how-do-i-declare-a-block-in-objective-c/">
+              <h3 class="post-title">
+                How Do I Declare A Block in Objective-C?
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '04588c222e2eae405cf6',
+    clientSecret: 'c33871df7e58baf4a984f68dc80394e692d5a12c',
+    repo: 'YBGitalkComments',
+    owner: 'hiwyb',
+    admin: ['hiwyb'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://hiwyb.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
